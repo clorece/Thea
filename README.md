@@ -37,11 +37,16 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
     cd rin
     ```
 
-2.  **Run Setup**:
+4.  **Run Setup**:
     Double-click `setup.bat`. This will:
     *   Create a Python virtual environment for the backend.
     *   Install Python dependencies.
     *   Install Node.js dependencies for the frontend.
+
+    > **⚠️ IMPORTANT SETUP NOTE:**
+    > If `setup.bat` installs Python or Node.js and asks to restart, **please restart your entire computer** (or fully log out and back in) to ensure system paths are updated.
+    >
+    > After restarting, **run `setup.bat` again**. Repeat this process until it completes without asking for a restart.
 
 3.  **Configure API Key**:
     *   Create a file named `GEMINI_API_KEY.txt` in the root directory.
