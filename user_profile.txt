@@ -1,0 +1,18 @@
+===================================================================
+                  THEA - USER PROFILE (OPTIONAL)
+===================================================================
+
+Thea can use this information to personalize her responses.
+ALL FIELDS ARE OPTIONAL. Leave them blank if you prefer privacy.
+
+-------------------------------------------------------------------
+
+Username=
+DateOfBirth=
+Interests=
+Dislikes=
+
+# Example:
+# Username=Kai
+# DateOfBirth=1990-01-31 (or Jan 31 1990, 31/01/1990, etc)
+# Interests=Gaming, Coding, Sci-Fi

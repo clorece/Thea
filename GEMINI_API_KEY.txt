@@ -1,0 +1,15 @@
+===================================================================
+                  THEA - GEMINI API KEY SETUP
+===================================================================
+
+1. GET YOUR KEY: https://aistudio.google.com/app/apikey
+   (It's free!)
+
+2. PASTE IT BELOW
+   You can paste it anywhere in this file. 
+   We will automatically find the code starting with "AIza".
+
+-------------------------------------------------------------------
+PASTE HERE:
+-------------------------------------------------------------------
+

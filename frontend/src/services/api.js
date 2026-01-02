@@ -11,14 +11,31 @@ export const checkHealth = async () => {
 };
 
 export const sendMessage = async (text) => {
-    // Placeholder for LLM interaction
-    // const response = await fetch(`${API_URL}/chat`, { ... });
-    return { response: "Echo: " + text };
-}
-
-export const captureScreen = async () => {
     try {
-        const response = await fetch(`${API_URL}/capture`);
+        const response = await fetch(`${API_URL}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Chat failed:', error);
+        return { response: "I can't hear you right now." };
+    }
+};
+
+export const getUpdates = async () => {
+    try {
+        const response = await fetch(`${API_URL}/updates`);
+        return await response.json();
+    } catch (error) {
+        return { type: 'none' };
+    }
+};
+
+export const captureScreen = async (analyze = false) => {
+    try {
+        const response = await fetch(`${API_URL}/capture?analyze=${analyze}`);
         return await response.json();
     } catch (error) {
         console.error('Capture failed:', error);

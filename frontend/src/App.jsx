@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { checkHealth, captureScreen } from './services/api';
+import ChatInterface from './components/ChatInterface';
+import ReactionOverlay from './components/ReactionOverlay';
 
 function App() {
     const [status, setStatus] = useState('Checking connection...');
@@ -29,9 +31,10 @@ function App() {
         let watchInterval;
         if (isWatching) {
             watchInterval = setInterval(async () => {
-                const data = await captureScreen();
+                // Request analysis (Backend handles rate limiting)
+                const data = await captureScreen(true);
                 if (data.status === 'ok') {
-                    setLastImage(`data: image / jpeg; base64, ${data.image} `);
+                    setLastImage(`data:image/jpeg;base64,${data.image}`);
                     setActiveWindow(data.window);
                 }
             }, 2000); // Check every 2 seconds
@@ -53,7 +56,8 @@ function App() {
             fontFamily: 'Segoe UI, sans-serif',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             WebkitAppRegion: 'drag',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            position: 'relative'
         }}>
             <h1 style={{ margin: '0 0 10px 0', fontSize: '24px', fontWeight: '300', letterSpacing: '1px' }}>THEA</h1>
 
@@ -93,9 +97,13 @@ function App() {
                 margin: '20px 0',
                 background: 'rgba(0,0,0,0.3)',
                 borderRadius: '12px',
-                border: '1px border rgba(255,255,255,0.05)',
-                overflow: 'hidden'
+                border: '1px solid rgba(255,255,255,0.05)',
+                overflow: 'hidden',
+                position: 'relative'
             }}>
+                {/* Reaction Overlay sits on top of the feed or screen */}
+                <ReactionOverlay isWatching={isWatching} />
+
                 {lastImage ? (
                     <img src={lastImage} style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain' }} alt="Vision Feed" />
                 ) : (
@@ -120,6 +128,11 @@ function App() {
                     }}>
                     {isWatching ? 'Stop Observing' : 'Start Observation'}
                 </button>
+            </div>
+
+            {/* Chat Interface (Floating) */}
+            <div style={{ WebkitAppRegion: 'no-drag' }}>
+                <ChatInterface />
             </div>
         </div>
     );
