@@ -61,7 +61,7 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
 *   **Debug Mode**: If you need to see logs or troubleshoot, use `debug.bat`.
 *   **Shutdown**: Click the Power button in the Rin header to cleanly shut down both the UI and the background brain.
 
-## 🎨 Personalization
+## Personalization
 
 You can teach Rin about yourself by editing `user_profile.txt` in the root directory:
 ```text
