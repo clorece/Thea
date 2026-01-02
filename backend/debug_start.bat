@@ -7,5 +7,6 @@ if not exist venv (
     pause
     exit /b
 )
+set PYTHONIOENCODING=utf-8
 venv\Scripts\python.exe -m uvicorn main:app --reload
 pause

@@ -96,18 +96,15 @@ class RinMind:
                 "2. Be clear and easy to understand. "
                 "3. If it's a game, offer your guidance. If it's work, quietly support their focus. "
                 "4. Keep it short (1 sentence). "
-                "5. Choose a relevant Emoji. "
-                "Output format: EMOJI | SHORT_REACTION_MESSAGE"
+                "5. DO NOT use Emojis. Text only. "
+                "Output format: SHORT_REACTION_MESSAGE"
             )
             
             response = self.model.generate_content([prompt, image])
             text = response.text.strip()
             
-            if "|" in text:
-                parts = text.split("|", 1)
-                return {"reaction": parts[0].strip(), "description": parts[1].strip()}
-            else:
-                return {"reaction": "👀", "description": text}
+            # Simple text return, no splitting needed
+            return {"reaction": "", "description": text}
 
         except Exception as e:
             import traceback
@@ -116,7 +113,7 @@ class RinMind:
                 f.write(f"\n[{time.ctime()}] Image Error: {str(e)}\n")
                 f.write(traceback.format_exc())
             print(f"Error analyzing image: {e}")
-            return {"reaction": "😵", "description": "My vision blurred for a second."}
+            return {"reaction": "", "description": "My vision blurred for a second."}
 
     async def analyze_image_async(self, image_bytes):
         """
@@ -142,19 +139,15 @@ class RinMind:
                 "2. Be clear and easy to understand. "
                 "3. If it's a game, offer your guidance. If it's work, quietly support their focus. "
                 "4. Keep it short (1 sentence). "
-                "5. Choose a relevant Emoji. "
-                "Output format: EMOJI | SHORT_REACTION_MESSAGE"
+                "5. DO NOT use Emojis. Text only. "
+                "Output format: SHORT_REACTION_MESSAGE"
             )
             
             # Async generation call
             response = await self.model.generate_content_async([prompt, image])
             text = response.text.strip()
             
-            if "|" in text:
-                parts = text.split("|", 1)
-                return {"reaction": parts[0].strip(), "description": parts[1].strip()}
-            else:
-                return {"reaction": "👀", "description": text}
+            return {"reaction": "", "description": text}
 
         except Exception as e:
             import traceback
@@ -170,7 +163,7 @@ class RinMind:
             except:
                 pass
             print(f"Error analyzing image (async): {e}")
-            return {"reaction": "😵", "description": "My vision blurred for a second."}
+            return {"reaction": "", "description": "My vision blurred for a second."}
 
     def chat_response(self, history, user_message):
         """
