@@ -23,36 +23,50 @@ if not errorlevel 1 (
 
 echo [2/3] Setting up Backend...
 cd backend
-if exist venv (
-    echo   - Virtual environment already exists.
-) else (
+if not exist venv (
     echo   - Creating virtual environment...
     %CARBON_PYTHON% -m venv venv
 )
-
 if not exist venv (
     echo   ! FAIL: Could not create venv.
-    echo   ! Please run 'debug.bat' for help.
     pause
     exit /b
 )
 
-echo   - Installing backend dependencies...
+echo   - Upgrading pip...
+venv\Scripts\python.exe -m pip install --upgrade pip > nul 2>&1
+
+echo   - Installing/Updating backend dependencies...
 venv\Scripts\python.exe -m pip install -r requirements.txt
+if errorlevel 1 (
+    echo   ! FAIL: Backend dependency install failed.
+    pause
+    exit /b
+)
 cd ..
 
 echo [3/3] Setting up Frontend...
+echo   - Checking npm...
+call npm --version > nul 2>&1
+if errorlevel 1 (
+    echo   ! CRITICAL: Node.js/npm not found. 
+    echo   ! Please install Node.js from https://nodejs.org/
+    pause
+    exit /b
+)
+
 cd frontend
-if exist node_modules (
-    echo   - Node modules already exist.
-) else (
-    echo   - Installing npm packages...
-    call npm install
+echo   - Installing/Updating frontend dependencies...
+call npm install
+if errorlevel 1 (
+    echo   ! FAIL: Frontend dependency install failed.
+    pause
+    exit /b
 )
 cd ..
 
 echo ==========================================
-echo      SETUP COMPLETE
+echo      SETUP COMPLETE - READY TO START
 echo ==========================================
 echo You can now run 'start.bat'
 pause

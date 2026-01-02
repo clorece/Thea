@@ -1,5 +1,7 @@
 # Rin - AI Desktop Companion
 
+> An edge intelligence companion for your personal computer.
+
 Rin is an intelligent, visually-aware desktop companion designed to quietly support your digital life. She observes your screen, understands your context, and offers guidance or company when you need it.
 
 ![Rin Preview](frontend/src/assets/rin-pfp.jpg)
@@ -13,6 +15,11 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
     *   **Rest Mode (Yellow)**: Activates after 120s of inactivity. Rin pauses observation to save resources and assumes a serene state.
 *   **Stealth User Mode**: Launches completely silently in the background (no terminal windows) via `start.bat`.
 *   **Chat Interface**: A clean, modern chat UI to talk with Rin directly.
+
+## 🔮 Roadmap & Future Implementations
+
+*   **Edge Intelligence**: We are implementing true edge intelligence concepts. Future versions will allow Rin to create her own data structures and store memories based on your PC contents and day-to-day activities, tailoring her personality and knowledge specifically to you.
+*   **Local LLM (Ollama)**: We plan to verify and implement Ollama support as an alternative to Gemini. This will allow for easier, free, and unlimited access to the companion using local hardware.
 
 ## 🚀 Getting Started
 
