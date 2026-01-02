@@ -5,8 +5,9 @@
 Rin is an intelligent, visually-aware desktop companion designed to quietly support your digital life. She observes your screen, understands your context, and offers guidance or company when you need it.
 
 ![Rin Preview](frontend/src/assets/rin-pfp.jpg)
+Image used for profile picture by daisukerichard on twitter! Please see credits below. If you are the original owner of this artwork and would like me to give proper credit or removal of this asset from the project, please let me know by contacting me through Github or Github Issues. 
 
-## ✨ Features
+## Features
 
 *   **Visual Awareness**: Rin "sees" your active window and understands what you are working on or playing.
 *   **Proactive Reactions**: She reacts to your context with relevant emojis and short comments without needing a prompt.
@@ -16,12 +17,12 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
 *   **Stealth User Mode**: Launches completely silently in the background (no terminal windows) via `start.bat`.
 *   **Chat Interface**: A clean, modern chat UI to talk with Rin directly.
 
-## 🔮 Roadmap & Future Implementations
+## Roadmap & Future Implementations
 
 *   **Edge Intelligence**: We are implementing true edge intelligence concepts. Future versions will allow Rin to create her own data structures and store memories based on your PC contents and day-to-day activities, tailoring her personality and knowledge specifically to you.
 *   **Local LLM (Ollama)**: We plan to verify and implement Ollama support as an alternative to Gemini. This will allow for easier, free, and unlimited access to the companion using local hardware.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 *   Windows 10/11
@@ -42,6 +43,7 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
     *   Create a Python virtual environment for the backend.
     *   Install Python dependencies.
     *   Install Node.js dependencies for the frontend.
+**Unfortunately setup.bat is currently bugged, if you are updating or installing Python or Node.js please restart immediately after setup.bat, then relaunch the setup batch file after restart to finishes the install for those, otherwise you will keep looping on the installation. This may force you to do more than 1 restart and setup initializations. I know this is not ideal, and will make a fix for it as soon as possible**
 
 3.  **Configure API Key**:
     *   Create a file named `GEMINI_API_KEY.txt` in the root directory.
@@ -64,7 +66,7 @@ Interests=Coding, Gaming, Sci-Fi
 Dislikes=Spiders, Lag
 ```
 
-## 💖 Credits
+## Credits
 
 **Profile Picture Art**:
 By **[@daisukerichard](https://x.com/daisukerichard)**
