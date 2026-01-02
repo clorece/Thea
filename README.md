@@ -2,10 +2,13 @@
 
 > An edge intelligence companion for your personal computer.
 
-Rin is an intelligent, visually-aware desktop companion designed to quietly support your digital life. She observes your screen, understands your context, and offers guidance or company when you need it.
+<div align="center">
+  <img src="frontend/src/assets/rin-pfp.jpg" alt="Image used for profile picture by daisukerichard on x! Please see credits below! " width="500"/>
+</div>
 
-![Rin Preview](frontend/src/assets/rin-pfp.jpg)
-Image used for profile picture by daisukerichard on twitter! Please see credits below. If you are the original owner of this artwork and would like me to give proper credit or removal of this asset from the project, please let me know by contacting me through Github or Github Issues. 
+<p align="center">Image used for profile picture by daisukerichard on x! Please see credits below!</p>
+
+Rin is an intelligent, visually-aware desktop companion designed to quietly support your digital life. She observes your screen, understands your context, and offers guidance or company when you need it.
 
 ## Features
 
@@ -21,6 +24,8 @@ Image used for profile picture by daisukerichard on twitter! Please see credits 
 
 *   **Edge Intelligence**: We are implementing true edge intelligence concepts. Future versions will allow Rin to create her own data structures and store memories based on your PC contents and day-to-day activities, tailoring her personality and knowledge specifically to you.
 *   **Local LLM (Ollama)**: We plan to verify and implement Ollama support as an alternative to Gemini. This will allow for easier, free, and unlimited access to the companion using local hardware.
+*   **Compact View**: A less obstructive and more minimal UI
+*   **Vocalized Responses and Microphone Inputs**: An optional system of communication where users can enable vocal communication instead of chat bubbles displayed by the companion, as well as an optional voice recording where users can chat with the companion using a microphone.
 
 ## Getting Started
 
@@ -71,6 +76,8 @@ Dislikes=Spiders, Lag
 **Profile Picture Art**:
 By **[@daisukerichard](https://x.com/daisukerichard)**
 *   [Original Post](https://x.com/daisukerichard/status/1599329420879491073)
+
+If you are the original owner of credited work and assets, and would like credit adjustments or removal of assets from the project, please feel free to contact me through github.
 
 **Development**:
 Built with Electron, React, FastAPI, and Google Gemini.
