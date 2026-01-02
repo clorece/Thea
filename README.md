@@ -16,7 +16,7 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
 *   **Proactive Reactions**: She reacts to your context with relevant emojis and short comments without needing a prompt.
 *   **Smart Idle System**:
     *   **Active (Green)**: Rin is watching and ready to chat.
-    *   **Rest Mode (Yellow)**: Activates after 120s of inactivity. Rin pauses observation to save resources and assumes a serene state.
+    *   **Rest Mode (Yellow)**: Activates after 120s of inactivity. Rin pauses observation to save resources and assumes a resting state.
 *   **Stealth User Mode**: Launches completely silently in the background (no terminal windows) via `start.bat`.
 *   **Chat Interface**: A clean, modern chat UI to talk with Rin directly.
 
