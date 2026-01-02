@@ -50,7 +50,10 @@ echo   - Checking npm...
 call npm --version > nul 2>&1
 if errorlevel 1 (
     echo   ! CRITICAL: Node.js/npm not found. 
-    echo   ! Please install Node.js from https://nodejs.org/
+    echo   ! Launching Node.js installer...
+    call nodejs_setup.bat
+    echo.
+    echo   ! Please restart 'setup.bat' after Node.js is installed and your terminal is restarted.
     pause
     exit /b
 )
