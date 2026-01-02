@@ -37,11 +37,16 @@ echo   - Upgrading pip...
 venv\Scripts\python.exe -m pip install --upgrade pip > nul 2>&1
 
 echo   - Installing/Updating backend dependencies...
-venv\Scripts\python.exe -m pip install -r requirements.txt
+venv\Scripts\python.exe -m pip install --upgrade -r requirements.txt
 if errorlevel 1 (
     echo   ! FAIL: Backend dependency install failed.
     pause
     exit /b
+)
+
+echo   - Configuring system integration (pywin32)...
+if exist venv\Scripts\pywin32_postinstall.py (
+    venv\Scripts\python.exe venv\Scripts\pywin32_postinstall.py -install -silent > nul 2>&1
 )
 cd ..
 
