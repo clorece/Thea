@@ -298,6 +298,21 @@ def get_proactive_insight():
         return {"has_insight": True, **insight}
     return {"has_insight": False}
 
+class ManualInsight(BaseModel):
+    message: str
+    relevance: float = 1.0
+
+@app.post("/knowledge/insight/manual")
+async def trigger_manual_insight(insight: ManualInsight):
+    """Manually trigger a proactive insight (for debugging)."""
+    insight_id = database.add_rin_insight(
+        insight_type="proactive",
+        content=insight.message,
+        context={"source": "manual_trigger"},
+        relevance_score=insight.relevance
+    )
+    return {"status": "created", "id": insight_id}
+
 @app.post("/knowledge/insight/{insight_id}/feedback")
 def submit_insight_feedback(insight_id: int, feedback: str = "acknowledged"):
     """Submit feedback on an insight."""

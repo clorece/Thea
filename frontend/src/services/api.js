@@ -42,6 +42,28 @@ export const captureScreen = async (analyze = false) => {
         return { status: 'error', error: error.message };
     }
 };
+
+export const getProactiveInsight = async () => {
+    try {
+        const response = await fetch(`${API_URL}/knowledge/proactive`);
+        return await response.json();
+    } catch (error) {
+        return { has_insight: false };
+    }
+};
+
+export const acknowledgeInsight = async (insightId, feedback = 'acknowledged') => {
+    try {
+        await fetch(`${API_URL}/knowledge/insight/${insightId}/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feedback })
+        });
+    } catch (error) {
+        console.error('Failed to acknowledge insight:', error);
+    }
+};
+
 export async function shutdownBackend() {
     try {
         await fetch(`${API_BASE}/shutdown`);

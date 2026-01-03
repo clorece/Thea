@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { checkHealth, captureScreen, getUpdates } from './services/api';
+import { checkHealth, captureScreen, getUpdates, getProactiveInsight, acknowledgeInsight } from './services/api';
 import ChatInterface from './components/ChatInterface';
 import ReactionOverlay from './components/ReactionOverlay';
+import { useNotificationQueue } from './hooks/useNotificationQueue';
 import rinPfp from './assets/rin-pfp.jpg';
 
 function App() {
@@ -11,9 +12,11 @@ function App() {
     const [isWatching, setIsWatching] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [showFeed, setShowFeed] = useState(false);
-    const [reaction, setReaction] = useState(null);
     const [userIdle, setUserIdle] = useState(false);
     const [idleTime, setIdleTime] = useState(0);
+
+    // Smart notification queue
+    const { current: currentNotification, enqueue, clearStale, setContext } = useNotificationQueue();
 
 
     useEffect(() => {
@@ -46,12 +49,11 @@ function App() {
                     setUserIdle(true);
                 } else if (idleSeconds < 2 && userIdle) {
                     setUserIdle(false);
-                    // Welcome back greeting
+                    // Welcome back greeting - use queue
                     const { sendMessage } = await import('./services/api');
                     const data = await sendMessage("[System]: User returned after break. Greet them.");
                     if (data.response) {
-                        setReaction({ content: '💬', description: data.response });
-                        setTimeout(() => setReaction(null), 5000);
+                        enqueue({ type: 'chat', content: '💬', description: data.response });
                     }
                 }
             } catch (e) {
@@ -61,30 +63,60 @@ function App() {
 
         const timer = setInterval(checkIdle, 1000);
         return () => clearInterval(timer);
-    }, [userIdle]);
+    }, [userIdle, enqueue]);
 
-    // Reaction Polling (Lifted from ReactionOverlay)
-    // Reaction Polling (Lifted from ReactionOverlay)
+    // Reaction Polling - enqueue reactions
     useEffect(() => {
         if (!isWatching || isPaused) return;
 
         const poll = async () => {
             const update = await getUpdates();
-            if (update && update.type === 'reaction') {
-                setReaction(update);
-                // Clear reaction after 5 seconds
-                setTimeout(() => setReaction(null), 5000);
+            if (update && (update.type === 'reaction' || update.type === 'proactive')) {
+                // Add context hash for scene change detection
+                enqueue({
+                    ...update,
+                    contextHash: activeWindow
+                });
             }
         };
 
         const interval = setInterval(poll, 1000);
         return () => clearInterval(interval);
-    }, [isWatching, isPaused]);
+    }, [isWatching, isPaused, activeWindow, enqueue]);
+
+    // Proactive Insight Polling - enqueue insights
+    useEffect(() => {
+        if (!isWatching || isPaused) return;
+
+        const pollInsights = async () => {
+            const insight = await getProactiveInsight();
+            if (insight && insight.has_insight) {
+                enqueue({
+                    type: 'insight',
+                    content: '💡',
+                    description: insight.message
+                });
+                // Mark as delivered
+                acknowledgeInsight(insight.id, 'displayed');
+            }
+        };
+
+        // Check immediately on mount
+        pollInsights();
+
+        // Then poll every 30 seconds
+        const interval = setInterval(pollInsights, 30000);
+        return () => clearInterval(interval);
+    }, [isWatching, isPaused, enqueue]);
+
+    // Scene change detection - clear stale reactions
+    useEffect(() => {
+        clearStale(activeWindow);
+        setContext(activeWindow);
+    }, [activeWindow, clearStale, setContext]);
 
     const handleChatReaction = (content) => {
-        setReaction({ content: '💬', description: content });
-        // Clear after 5 seconds
-        setTimeout(() => setReaction(null), 5000);
+        enqueue({ type: 'chat', content: '💬', description: content });
     };
 
     const handleRestart = async () => {
@@ -348,8 +380,8 @@ function App() {
                 </div>
             </div>
 
-            {/* Reaction Overlay (Controlled by App state) */}
-            <ReactionOverlay reaction={reaction} />
+            {/* Reaction Overlay (Controlled by notification queue) */}
+            <ReactionOverlay reaction={currentNotification} />
 
             {/* Main Content Area (Chat) */}
             <div style={{

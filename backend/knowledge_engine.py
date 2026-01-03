@@ -256,6 +256,15 @@ class KnowledgeEngine:
         # Generate new insights from knowledge
         insight = self._generate_insight_from_knowledge()
         if insight:
+            # Check if we already have this specific insight (shared or unshared) to avoid spam
+            existing = database.get_db_connection().execute(
+                "SELECT id FROM rin_insights WHERE content = ? AND created_at > date('now', '-1 day')",
+                (insight["message"],)
+            ).fetchone()
+            
+            if existing:
+                return None
+
             insight_id = database.add_rin_insight(
                 insight_type=insight["type"],
                 content=insight["message"],
@@ -283,7 +292,7 @@ class KnowledgeEngine:
             top_interest = interests[0]
             if top_interest["evidence_count"] >= 5:  # Only share well-established insights
                 return {
-                    "type": "observation",
+                    "type": "proactive",  # Changed from 'observation' so frontend displays it
                     "message": f"I've noticed you're quite interested in {top_interest['value']}.",
                     "context": {"knowledge_id": top_interest["id"]},
                     "relevance": 0.7
@@ -294,7 +303,7 @@ class KnowledgeEngine:
         if len(app_usage) >= 3:
             categories = [k["key"] for k in app_usage[:3]]
             return {
-                "type": "pattern",
+                "type": "proactive",
                 "message": f"Your main focus areas seem to be: {', '.join(categories)}.",
                 "context": {"categories": categories},
                 "relevance": 0.6
