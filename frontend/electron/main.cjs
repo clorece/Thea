@@ -27,9 +27,15 @@ function createWindow() {
         const bottomY = bounds.y + bounds.height;
         const newY = bottomY - height;
 
-        // mainWindow.setBounds({ x: bounds.x, y: newY, width: width, height: height }, { animate: true });
         // animation is buggy on transparent windows sometimes, let's try direct set
         mainWindow.setBounds({ x: bounds.x, y: newY, width: width, height: height });
+    });
+
+    // Handle Always-On-Top Toggle
+    ipcMain.on('set-always-on-top', (event, { enabled, level }) => {
+        // level can be 'normal', 'floating', 'torn-off-menu', 'modal-panel', 'main-menu', 'status', 'pop-up-menu', 'screen-saver'
+        // 'screen-saver' is highest and covers fullscreen apps.
+        mainWindow.setAlwaysOnTop(enabled, level || 'normal');
     });
 
     ipcMain.on('quit-app', () => {
@@ -66,12 +72,19 @@ app.on('window-all-closed', () => {
 });
 
 // Cleanup backend when app quits
+// Cleanup backend when app quits
 app.on('before-quit', () => {
+    console.log("Stopping processes...");
     try {
-        // Kill all Python processes (uvicorn spawns multiple)
         const { execSync } = require('child_process');
+        // Kill Python backend
         execSync('taskkill /F /IM python.exe 2>nul', { stdio: 'ignore' });
+        // Kill Ollama side-processes if any (optional)
+        // execSync('taskkill /F /IM ollama.exe 2>nul', { stdio: 'ignore' });
+
+        // Note: We don't kill node.exe because it might be running other things.
+        // In dev mode, the terminal window will remain open - this is expected.
     } catch (e) {
-        // Ignore - processes might already be dead
+        // Ignore
     }
 });

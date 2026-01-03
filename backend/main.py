@@ -16,6 +16,8 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import base64
 import asyncio
+from io import BytesIO
+from PIL import Image, ImageChops, ImageStat
 import database
 from llm import mind
 from capture import capture_screen_base64, get_active_window_title
@@ -23,6 +25,7 @@ from activity_tracker import activity_collector
 from pattern_engine import pattern_engine
 from learning_config import get_config, update_config
 from knowledge_engine import knowledge_engine
+from ears import ears
 
 # -- Data Models --
 class ChatMessage(BaseModel):
@@ -52,12 +55,16 @@ async def startup_event():
     """Start background services on app startup."""
     print("[Startup] Starting activity collector...")
     activity_collector.start()
+    print("[Startup] Starting ears (audio capture)...")
+    ears.start()
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Clean up on app shutdown."""
     print("[Shutdown] Stopping activity collector...")
     activity_collector.stop()
+    print("[Shutdown] Stopping ears...")
+    ears.stop()
 
 @app.get("/")
 def read_root():
@@ -66,6 +73,41 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "ok", "learning_active": activity_collector.is_running()}
+
+
+def calculate_visual_difference(img_b64_1, img_b64_2):
+    """
+    Calculates the visual difference between two base64 images.
+    Returns a float representing the percentage difference (0.0 to 100.0).
+    """
+    try:
+        if not img_b64_1 or not img_b64_2:
+            return 100.0
+            
+        # Convert base64 to PIL Images
+        img1_data = base64.b64decode(img_b64_1)
+        img2_data = base64.b64decode(img_b64_2)
+        
+        img1 = Image.open(BytesIO(img1_data)).convert('RGB')
+        img2 = Image.open(BytesIO(img2_data)).convert('RGB')
+        
+        # Resize to small thumbnails for fast comparison
+        thumb_size = (64, 64)
+        img1 = img1.resize(thumb_size)
+        img2 = img2.resize(thumb_size)
+        
+        # Calculate difference
+        diff = ImageChops.difference(img1, img2)
+        stat = ImageStat.Stat(diff)
+        
+        # Average difference across channels
+        diff_val = sum(stat.mean) / len(stat.mean)
+        
+        # Normalize roughly to a percentage (255 is max diff)
+        return (diff_val / 255.0) * 100.0
+    except Exception as e:
+        print(f"Diff Check Error: {e}")
+        return 100.0
 
 @app.get("/capture")
 async def get_screen_capture(analyze: bool = False):
@@ -76,42 +118,66 @@ async def get_screen_capture(analyze: bool = False):
     global last_analyzed_title, last_analyzed_image, last_trigger_time
     
     title = get_active_window_title()
-    image_b64 = capture_screen_base64(scale=0.5)
+    # Use higher quality scale
+    image_b64 = capture_screen_base64(scale=0.75)
     
-    # -- Simplified Trigger Logic --
+    # -- Smart Trigger Logic --
     # 1. Title Change: Immediate
-    # 2. Timer: Every 15 seconds (if no title change)
+    # 2. Visual Change: If timer > 3s AND significant visual difference
+    # 3. Force Update: If timer > 30s (sanity check)
     
     import time
     should_trigger = False
     current_time = time.time()
+    visual_diff = 0.0
     
     # Check Title Change
     if title != last_analyzed_title:
         print(f"[Trigger] Title changed: '{last_analyzed_title}' -> '{title}'")
         should_trigger = True
     
-    # Check Time Cooldown (Periodic reaction)
-    elif (current_time - last_trigger_time) > 15:
-        print(f"[Trigger] Timer > 15s")
-        should_trigger = True
-
+    # Check Timer & Visuals
+    elif (current_time - last_trigger_time) > 3.0:
+        # Only check visual difference if enough time has passed to matter
+        if last_analyzed_image:
+            visual_diff = calculate_visual_difference(last_analyzed_image, image_b64)
+            # Threshold: 2.5% specific difference (enough to ignore clock seconds changing, etc)
+            if visual_diff > 2.5:
+                print(f"[Trigger] Visual Diff: {visual_diff:.2f}% (> 2.5%)")
+                should_trigger = True
+            elif (current_time - last_trigger_time) > 30.0:
+                 # Force update every 30s even if static, just to be alive
+                 print(f"[Trigger] Force update (30s timeout)")
+                 should_trigger = True
+        else:
+            should_trigger = True
+            
     if analyze and should_trigger:
         last_analyzed_title = title
         last_trigger_time = current_time
+        last_analyzed_image = image_b64  # Update last seen image
         asyncio.create_task(process_observation(title, image_b64))
         
     return {
         "status": "ok",
         "window": title,
-        "image": image_b64
+        "image": image_b64,
+        "diff": visual_diff
     }
 
 async def process_observation(window_title, image_b64):
     """Background task to analyze screen and store memory."""
     try:
         image_bytes = base64.b64decode(image_b64)
-        result = await mind.analyze_image_async(image_bytes)
+        
+        # Capture simultaneous audio (last 5 seconds)
+        audio_bytes = ears.get_recent_audio_bytes(duration_seconds=5.0)
+        if audio_bytes:
+            print(f"[Ears] Captured {len(audio_bytes)} bytes of audio context")
+        else:
+            print(f"[Ears] No audio captured (running={ears.running}, buffer_size={len(ears.audio_buffer)})")
+        
+        result = await mind.analyze_image_async(image_bytes, audio_bytes=audio_bytes)
         
         # Store in DB
         content = f"User is processing: {window_title}. Observation: {result['description']}"
@@ -148,7 +214,8 @@ async def process_observation(window_title, image_b64):
                     image_bytes=image_bytes,
                     window_title=window_title or "",
                     app_name=app_name or "",
-                    app_category=app_category
+                    app_category=app_category,
+                    audio_bytes=audio_bytes
                 )
                 
                 if gemini_result.get("learned"):
@@ -205,8 +272,15 @@ async def chat_endpoint(msg: ChatMessage):
     # Record user message
     database.add_memory("chat", f"User: {msg.message}")
     
-    # Generate response
-    response_text = mind.chat_response(formatted_history, msg.message)
+    # Capture current audio for context (if ears are active)
+    audio_bytes = None
+    if ears.running:
+        audio_bytes = ears.get_recent_audio_bytes(duration_seconds=5.0)
+        if audio_bytes:
+            print(f"[Chat] Including {len(audio_bytes)} bytes of audio context")
+    
+    # Generate response (with optional audio context)
+    response_text = await mind.chat_response_async(formatted_history, msg.message, audio_bytes=audio_bytes)
     
     # Record model response
     database.add_memory("chat", f"Rin: {response_text}")
@@ -229,6 +303,20 @@ def shutdown_server():
     activity_collector.stop()
     os.kill(os.getpid(), signal.SIGTERM)
     return {"status": "shutting_down"}
+
+@app.get("/ears/status")
+def get_ears_status():
+    """Get current status of audio listening."""
+    return {"listening": ears.running, "device": ears.mic.name if ears.mic else "None"}
+
+@app.post("/ears/toggle")
+def toggle_ears(enable: bool):
+    """Enable or disable audio listening."""
+    if enable:
+        ears.start()
+    else:
+        ears.stop()
+    return {"listening": ears.running}
 
 
 # ============== Activity & Learning Endpoints ==============

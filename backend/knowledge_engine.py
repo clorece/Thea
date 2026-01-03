@@ -70,10 +70,11 @@ class KnowledgeEngine:
         return result
     
     async def process_observation_with_gemini(self, image_bytes, window_title: str,
-                                               app_name: str, app_category: str) -> dict:
+                                               app_name: str, app_category: str,
+                                               audio_bytes=None) -> dict:
         """
         Process an observation using Gemini for intelligent learning.
-        This is the Phase 2B vision-based approach.
+        This is the Phase 2B vision-based approach with optional audio.
         
         Returns: { "learned": bool, "new_context": bool, "insight": str|None, "proactive": str|None }
         """
@@ -89,11 +90,12 @@ class KnowledgeEngine:
         # Get recent contexts for comparison
         recent_contexts = self._get_recent_contexts(limit=5)
         
-        # Ask Gemini to analyze this observation for learning
+        # Ask Gemini to analyze this observation for learning (with optional audio)
         learning_result = await mind.analyze_for_learning(
             image_bytes=image_bytes,
             window_title=window_title,
-            recent_contexts=recent_contexts
+            recent_contexts=recent_contexts,
+            audio_bytes=audio_bytes
         )
         
         # Process Gemini's learning response

@@ -6,7 +6,9 @@ requests
 Pillow>=10.0.0
 pywin32
 mss
-google-generativeai>=0.3.0
+google-generativeai>=0.8.3
 watchdog>=3.0.0
 psutil>=5.9.0
 aiofiles
+soundcard>=0.4.0
+numpy>=1.20.0

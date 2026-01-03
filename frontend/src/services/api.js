@@ -66,8 +66,27 @@ export const acknowledgeInsight = async (insightId, feedback = 'acknowledged') =
 
 export async function shutdownBackend() {
     try {
-        await fetch(`${API_BASE}/shutdown`);
+        await fetch(`${API_URL}/shutdown`);
     } catch (e) {
         console.log('Backend shutdown command sent (or failed if already off)');
     }
 }
+
+export const getEarsStatus = async () => {
+    try {
+        const response = await fetch(`${API_URL}/ears/status`);
+        return await response.json();
+    } catch (error) {
+        return { listening: false };
+    }
+};
+
+export const toggleEars = async (enable) => {
+    try {
+        const response = await fetch(`${API_URL}/ears/toggle?enable=${enable}`, { method: 'POST' });
+        return await response.json();
+    } catch (error) {
+        console.error('Toggle ears failed:', error);
+        return { listening: false };
+    }
+};

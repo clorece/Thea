@@ -14,6 +14,8 @@ function App() {
     const [showFeed, setShowFeed] = useState(false);
     const [userIdle, setUserIdle] = useState(false);
     const [idleTime, setIdleTime] = useState(0);
+    const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
+    const [isListening, setIsListening] = useState(true); // Audio listening state
 
     // Smart notification queue
     const { current: currentNotification, enqueue, clearStale, setContext } = useNotificationQueue();
@@ -28,6 +30,13 @@ function App() {
             } else {
                 setStatus('Connection Failed: Neural Core Offline');
             }
+
+            // Check ears status
+            try {
+                const { getEarsStatus } = await import('./services/api');
+                const earsStatus = await getEarsStatus();
+                setIsListening(earsStatus.listening);
+            } catch (e) { }
         };
         connect();
 
@@ -137,6 +146,15 @@ function App() {
         }, 800);
     };
 
+    const toggleAlwaysOnTop = () => {
+        const newState = !isAlwaysOnTop;
+        setIsAlwaysOnTop(newState);
+        if (window.electronAPI) {
+            // 'screen-saver' level is needed to stay on top of fullscreen games
+            window.electronAPI.setAlwaysOnTop(true, newState ? 'screen-saver' : 'normal');
+        }
+    };
+
     // Observation Loop
     useEffect(() => {
         let watchInterval;
@@ -226,16 +244,22 @@ function App() {
                     {/* Main Controls Group */}
                     <div style={{ display: 'flex', gap: '8px' }}>
                         {/* Power (Shutdown) */}
+                        {/* Power (Shutdown) */}
                         <button
-                            onClick={async () => {
-                                try {
-                                    const { shutdownBackend } = await import('./services/api');
-                                    await shutdownBackend();
-                                } catch (e) {
-                                    console.error("Failed to shutdown backend:", e);
-                                }
+                            onClick={() => {
+                                // 1. Fire backend shutdown (don't await, just send it)
+                                import('./services/api').then(({ shutdownBackend }) => {
+                                    shutdownBackend().catch(err => console.log("Backend shutdown ignored:", err));
+                                }).catch(() => { });
+
+                                // 2. Quit Electron UI content locally
                                 setTimeout(() => {
-                                    if (window.electronAPI) window.electronAPI.quitApp();
+                                    console.log("Quitting App...");
+                                    if (window.electronAPI && window.electronAPI.quitApp) {
+                                        window.electronAPI.quitApp();
+                                    } else {
+                                        window.close();
+                                    }
                                 }, 100);
                             }}
                             title="Shut Down System"
@@ -324,6 +348,47 @@ function App() {
                             </svg>
                         </button>
 
+                        {/* Ears Toggle */}
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const { toggleEars } = await import('./services/api');
+                                    const newState = !isListening;
+                                    const result = await toggleEars(newState);
+                                    setIsListening(result.listening);
+                                } catch (e) {
+                                    console.error("Failed to toggle ears:", e);
+                                }
+                            }}
+                            title={isListening ? "Mute Ears" : "Enable Ears"}
+                            style={{
+                                width: '32px',
+                                height: '32px',
+                                background: isListening ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+                                color: isListening ? '#4ade80' : 'white',
+                                border: isListening ? '1px solid rgba(74, 222, 128, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {isListening ? (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                </svg>
+                            ) : (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            )}
+                        </button>
+
                         {/* Dev Mode Toggle (Hidden for User Mode) */}
                         {/* <button
                             onClick={() => setShowFeed(!showFeed)}
@@ -377,6 +442,23 @@ function App() {
                             transition: 'all 0.3s ease'
                         }} title={userIdle ? "System Idle (Rest Mode)" : status} />
                     </div>
+
+                    {/* Always On Top Toggle */}
+                    <button
+                        onClick={toggleAlwaysOnTop}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            opacity: isAlwaysOnTop ? 1 : 0.5,
+                            filter: isAlwaysOnTop ? 'drop-shadow(0 0 5px #4ade80)' : 'none',
+                            transition: 'all 0.3s'
+                        }}
+                        title="Force Always On Top (Overlay Games)"
+                    >
+                        📌
+                    </button>
                 </div>
             </div>
 

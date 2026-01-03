@@ -12,7 +12,7 @@ def get_active_window_title():
     except Exception as e:
         return f"Error getting window: {e}"
 
-def capture_screen_base64(scale=0.5):
+def capture_screen_base64(scale=0.75):
     """
     Captures the primary monitor, resizes it (for speed/LLM limits), 
     and returns a base64 string.
@@ -34,7 +34,7 @@ def capture_screen_base64(scale=0.5):
             
         # Convert to Base64
         buffered = BytesIO()
-        img.save(buffered, format="JPEG", quality=85)
+        img.save(buffered, format="JPEG", quality=90)
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         
         return img_str

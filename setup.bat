@@ -97,7 +97,18 @@ if errorlevel 1 (
 cd ..
 
 echo ==========================================
+echo ==========================================
 echo      SETUP COMPLETE - READY TO START
 echo ==========================================
+echo.
+if not exist GEMINI_API_KEY.txt (
+    echo [!] WARNING: GEMINI_API_KEY.txt not found!
+    echo     Rin needs an API Key to see and hear.
+    echo     Please create 'GEMINI_API_KEY.txt' in this folder and paste your key inside.
+    echo.
+) else (
+    echo [OK] API Key detected.
+)
+
 echo You can now run 'start.bat'
 pause
