@@ -39,7 +39,7 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/rin.git
+    git clone https://github.com/clorece/rin.git
     cd rin
     ```
 
@@ -48,12 +48,12 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
     *   Create a Python virtual environment for the backend.
     *   Install Python dependencies.
     *   Install Node.js dependencies for the frontend.
-**Unfortunately setup.bat is currently bugged, if you are updating or installing Python or Node.js please restart immediately after setup.bat, then relaunch the setup batch file after restart to finishes the install for those, otherwise you will keep looping on the installation. This may force you to do more than 1 restart and setup initializations. I know this is not ideal, and will make a fix for it as soon as possible**
 
     > **⚠️ IMPORTANT SETUP NOTE:**
-    > If `setup.bat` installs Python or Node.js and asks to restart, **please restart your entire computer** (or fully log out and back in) to ensure system paths are updated.
-    >
-    > After restarting, **run `setup.bat` again**. Repeat this process until it completes without asking for a restart.
+    > Unfortunately setup.bat is currently bugged, if you are updating or installing Python or Node.js please restart immediately after setup.bat,
+    > then relaunch the setup batch file after restart to finishes the install for those, otherwise you will keep looping on the installation.
+    > This may force you to do more than 1 restart and setup initializations.
+    > I know this is not ideal, and will make a fix for it as soon as possible.
 
 3.  **Configure API Key**:
     *   Create a file named `GEMINI_API_KEY.txt` in the root directory.
