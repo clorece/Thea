@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { checkHealth, captureScreen, getUpdates, getProactiveInsight, acknowledgeInsight } from './services/api';
 import ChatInterface from './components/ChatInterface';
-import ReactionOverlay from './components/ReactionOverlay';
-import { useNotificationQueue } from './hooks/useNotificationQueue';
+import NotificationCenter from './components/NotificationCenter';
 import rinPfp from './assets/rin-pfp.jpg';
 
 function App() {
@@ -16,9 +15,19 @@ function App() {
     const [idleTime, setIdleTime] = useState(0);
     const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
     const [isListening, setIsListening] = useState(true); // Audio listening state
+    const [externalChatMessage, setExternalChatMessage] = useState(null);
 
-    // Smart notification queue
-    const { current: currentNotification, enqueue, clearStale, setContext } = useNotificationQueue();
+    // Notification History
+    const [notifications, setNotifications] = useState([]);
+
+    const addNotification = (notif) => {
+        const entry = {
+            ...notif,
+            id: Date.now() + Math.random(),
+            timestamp: Date.now()
+        };
+        setNotifications(prev => [entry, ...prev].slice(0, 5));
+    };
 
 
     useEffect(() => {
@@ -58,11 +67,12 @@ function App() {
                     setUserIdle(true);
                 } else if (idleSeconds < 2 && userIdle) {
                     setUserIdle(false);
-                    // Welcome back greeting - use queue
+                    // Welcome back greeting
                     const { sendMessage } = await import('./services/api');
                     const data = await sendMessage("[System]: User returned after break. Greet them.");
                     if (data.response) {
-                        enqueue({ type: 'chat', content: '💬', description: data.response });
+                        const texts = Array.isArray(data.response) ? data.response : [data.response];
+                        texts.forEach(text => addNotification({ type: 'chat', content: '💬', description: text }));
                     }
                 }
             } catch (e) {
@@ -72,7 +82,7 @@ function App() {
 
         const timer = setInterval(checkIdle, 1000);
         return () => clearInterval(timer);
-    }, [userIdle, enqueue]);
+    }, [userIdle]);
 
     // Reaction Polling - enqueue reactions
     useEffect(() => {
@@ -80,9 +90,12 @@ function App() {
 
         const poll = async () => {
             const update = await getUpdates();
-            if (update && (update.type === 'reaction' || update.type === 'proactive')) {
-                // Add context hash for scene change detection
-                enqueue({
+            if (update && (update.type === 'reaction' || update.type === 'proactive' || update.type === 'chat')) {
+                if (update.type === 'chat') {
+                    setExternalChatMessage(update.description);
+                }
+
+                addNotification({
                     ...update,
                     contextHash: activeWindow
                 });
@@ -91,7 +104,7 @@ function App() {
 
         const interval = setInterval(poll, 1000);
         return () => clearInterval(interval);
-    }, [isWatching, isPaused, activeWindow, enqueue]);
+    }, [isWatching, isPaused, activeWindow]);
 
     // Proactive Insight Polling - enqueue insights
     useEffect(() => {
@@ -100,7 +113,7 @@ function App() {
         const pollInsights = async () => {
             const insight = await getProactiveInsight();
             if (insight && insight.has_insight) {
-                enqueue({
+                addNotification({
                     type: 'insight',
                     content: '💡',
                     description: insight.message
@@ -116,16 +129,17 @@ function App() {
         // Then poll every 30 seconds
         const interval = setInterval(pollInsights, 30000);
         return () => clearInterval(interval);
-    }, [isWatching, isPaused, enqueue]);
+    }, [isWatching, isPaused]);
 
     // Scene change detection - clear stale reactions
     useEffect(() => {
-        clearStale(activeWindow);
-        setContext(activeWindow);
-    }, [activeWindow, clearStale, setContext]);
+        // We could clear stale items from list here if desired
+        setActiveWindow(activeWindow);
+    }, [activeWindow]);
 
     const handleChatReaction = (content) => {
-        enqueue({ type: 'chat', content: '💬', description: content });
+        const text = typeof content === 'string' ? content : (content?.description || '');
+        if (text) addNotification({ type: 'chat', content: '💬', description: text });
     };
 
     const handleRestart = async () => {
@@ -462,8 +476,8 @@ function App() {
                 </div>
             </div>
 
-            {/* Reaction Overlay (Controlled by notification queue) */}
-            <ReactionOverlay reaction={currentNotification} />
+            {/* Notification Center (Controlled by list state) */}
+            <NotificationCenter notifications={notifications} />
 
             {/* Main Content Area (Chat) */}
             <div style={{
@@ -474,7 +488,7 @@ function App() {
                 flexDirection: 'column',
                 overflow: 'hidden'
             }}>
-                <ChatInterface onReaction={handleChatReaction} />
+                <ChatInterface onReaction={handleChatReaction} incomingMessage={externalChatMessage} />
             </div>
 
             {/* Vision Feed (The Mirror) - At Bottom */}{showFeed && (

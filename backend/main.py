@@ -19,7 +19,7 @@ import asyncio
 from io import BytesIO
 from PIL import Image, ImageChops, ImageStat
 import database
-from llm import mind
+from llm import mind, split_into_chunks
 from capture import capture_screen_base64, get_active_window_title
 from activity_tracker import activity_collector
 from pattern_engine import pattern_engine
@@ -32,7 +32,7 @@ class ChatMessage(BaseModel):
     message: str
 
 class ChatResponse(BaseModel):
-    response: str
+    response: List[str]
 
 class LearningConfigUpdate(BaseModel):
     enabled: Optional[bool] = None
@@ -282,10 +282,26 @@ async def chat_endpoint(msg: ChatMessage):
     # Generate response (with optional audio context)
     response_text = await mind.chat_response_async(formatted_history, msg.message, audio_bytes=audio_bytes)
     
-    # Record model response
+    # Record model response (full text)
     database.add_memory("chat", f"Rin: {response_text}")
     
-    return {"response": response_text}
+    # Split for display
+    chunks = split_into_chunks(response_text, limit=200)
+    
+    # Queue extra chunks
+    if len(chunks) > 1:
+        for chunk in chunks[1:]:
+            # We use 'chat' type so frontend ChatBox can potentially pick it up via queue if we wire it,
+            # OR we use 'reaction' type so it shows in overlay.
+            # User request: "queue should adapt to this change by queueing rin's seperated message in order"
+            # We will use 'chat' type and ensure frontend handles it.
+            reaction_queue.append({
+                "type": "chat",
+                "content": "💬",
+                "description": chunk
+            })
+            
+    return {"response": [chunks[0]] if chunks else []}
 
 @app.get("/updates")
 def get_updates():

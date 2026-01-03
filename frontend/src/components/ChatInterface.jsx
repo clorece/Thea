@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { sendMessage } from '../services/api';
 import { Send } from 'lucide-react';
 import rinPfp from '../assets/rin-pfp.jpg';
 
-export default function ChatInterface({ onReaction }) {
+export default function ChatInterface({ onReaction, incomingMessage }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -14,6 +15,13 @@ export default function ChatInterface({ onReaction }) {
     };
 
     useEffect(scrollToBottom, [messages]);
+
+    // Handle external incoming messages (from queue/split)
+    useEffect(() => {
+        if (incomingMessage) {
+            setMessages(prev => [...prev, { role: 'model', content: incomingMessage }]);
+        }
+    }, [incomingMessage]);
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -26,11 +34,20 @@ export default function ChatInterface({ onReaction }) {
         const data = await sendMessage(userMsg);
 
         setIsTyping(false);
-        setMessages(prev => [...prev, { role: 'model', content: data.response }]);
 
-        // Trigger notification
-        if (onReaction && data.response) {
-            onReaction(data.response);
+        // Backend now returns a List[str] (usually just [chunks[0]])
+        if (data.response && Array.isArray(data.response)) {
+            const newMsgs = data.response.map(text => ({ role: 'model', content: text }));
+            setMessages(prev => [...prev, ...newMsgs]);
+
+            // Notify overlay about first chunk
+            if (onReaction && newMsgs.length > 0) {
+                onReaction(newMsgs[0].content);
+            }
+        } else if (data.response) {
+            // Fallback for string
+            setMessages(prev => [...prev, { role: 'model', content: data.response }]);
+            if (onReaction) onReaction(data.response);
         }
     };
 
@@ -43,15 +60,16 @@ export default function ChatInterface({ onReaction }) {
             position: 'relative',
             overflow: 'hidden' // Contain children
         }}>
+
             {/* Messages Area */}
             <div style={{
                 flex: 1,
                 overflowY: 'auto',
-                padding: '10px 4px', // Slight padding, scrollbar space
+                padding: '10px 6px', // Align with NotificationCenter
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
-                marginTop: '220px' // Increased space for ReactionOverlay/Notification at the top
+                // marginTop removed (layout is now flex)
             }}>
                 <div style={{ flex: 1 }} />
 
@@ -66,41 +84,49 @@ export default function ChatInterface({ onReaction }) {
                     </div>
                 )}
 
-                {messages.map((msg, idx) => (
-                    <div key={idx} style={{
-                        alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        maxWidth: '85%'
-                    }}>
-                        {msg.role === 'model' && (
-                            <img
-                                src={rinPfp}
-                                alt="Rin"
-                                style={{
-                                    width: '36px',
-                                    height: '36px',
-                                    borderRadius: '50%',
-                                    objectFit: 'cover',
-                                    border: '1px solid rgba(255,255,255,0.1)'
-                                }}
-                            />
-                        )}
-                        <div style={{
-                            background: msg.role === 'user' ? '#3b82f6' : 'rgba(255,255,255,0.08)',
-                            padding: '8px 12px',
-                            borderRadius: '12px',
-                            fontSize: '14px',
-                            lineHeight: '1.4',
-                            color: 'white',
-                            borderBottomRightRadius: msg.role === 'user' ? '2px' : '12px',
-                            borderBottomLeftRadius: msg.role === 'model' ? '2px' : '12px'
-                        }}>
-                            {msg.content}
-                        </div>
-                    </div>
-                ))}
+                <AnimatePresence>
+                    {messages.map((msg, idx) => (
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            style={{
+                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                maxWidth: '85%'
+                            }}
+                        >
+                            {msg.role === 'model' && (
+                                <img
+                                    src={rinPfp}
+                                    alt="Rin"
+                                    style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        border: '1px solid rgba(255,255,255,0.1)'
+                                    }}
+                                />
+                            )}
+                            <div style={{
+                                background: msg.role === 'user' ? '#3b82f6' : 'rgba(255,255,255,0.08)',
+                                padding: '8px 12px',
+                                borderRadius: '12px',
+                                fontSize: '14px',
+                                lineHeight: '1.4',
+                                color: 'white',
+                                borderBottomRightRadius: msg.role === 'user' ? '2px' : '12px',
+                                borderBottomLeftRadius: msg.role === 'model' ? '2px' : '12px'
+                            }}>
+                                {msg.content}
+                            </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
 
                 {isTyping && (
                     <div style={{ alignSelf: 'flex-start', color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginLeft: '8px' }}>

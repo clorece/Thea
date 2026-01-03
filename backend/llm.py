@@ -1,6 +1,7 @@
 import google.generativeai as genai
 import os
 import time
+import re
 
 # Attempt to configure from environment or files
 API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -28,6 +29,44 @@ if not API_KEY:
 
 if API_KEY:
     genai.configure(api_key=API_KEY)
+
+def split_into_chunks(text, limit=150):
+    """
+    Splits text into chunks of roughly 'limit' characters, checking for natural sentence boundaries.
+    """
+    if len(text) <= limit:
+        return [text]
+    
+    chunks = []
+    current_chunk = ""
+    
+    # Split by simple sentence delimiters first
+    # This regex splits by .!? but keeps the delimiter
+    sentences = re.split(r'(?<=[.!?]) +', text)
+    
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) < limit:
+            current_chunk += sentence + " "
+        else:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+            current_chunk = sentence + " "
+            
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+        
+    # If any chunk is still huge (no punctuation), force split
+    final_chunks = []
+    for c in chunks:
+        while len(c) > limit:
+            split_point = c[:limit].rfind(" ")
+            if split_point == -1: split_point = limit
+            final_chunks.append(c[:split_point])
+            c = c[split_point:].strip()
+        if c:
+            final_chunks.append(c)
+            
+    return final_chunks
 
 class RinMind:
     def __init__(self):
