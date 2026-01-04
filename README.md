@@ -136,7 +136,7 @@ If you encounter any bugs or issues, please report them via the **[GitHub Issues
 
 **Profile Picture Art**:
 By **[@daisukerichard](https://x.com/daisukerichard)**
-*   [Original Post](https://x.com/daisukerichard/status/1599329420879491073)
+*   [Original Post](https://x.com/daisukerichard/status/1535913944262803456?s=20)
 
 If you are the original owner of credited work and assets, and would like credit adjustments or removal of assets from the project, please feel free to contact me through github.
 
