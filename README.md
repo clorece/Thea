@@ -11,21 +11,49 @@
 Rin is an intelligent, visually-aware desktop companion designed to quietly support your digital life. She observes your screen, understands your context, and offers guidance or company when you need it.
 
 ## Features
-
 *   **Visual Awareness**: Rin "sees" your active window and understands what you are working on or playing.
-*   **Proactive Reactions**: She reacts to your context with relevant emojis and short comments without needing a prompt.
+*   **Audio Awareness**: Rin "hears" system audio (music, game sounds) via loopback and uses it to understand the vibe.
+*   **Episodic Memory**: Rin remembers recent activities (e.g., "Back to coding?"), creating a continuous sense of companionship.
+*   **Notification Center**: A dedicated, scrollable hub for Rin's observations and thoughts, separate from the chat.
 *   **Smart Idle System**:
     *   **Active (Green)**: Rin is watching and ready to chat.
-    *   **Rest Mode (Yellow)**: Activates after 120s of inactivity. Rin pauses observation to save resources and assumes a resting state.
-*   **Stealth User Mode**: Launches completely silently in the background (no terminal windows) via `start.bat`.
-*   **Chat Interface**: A clean, modern chat UI to talk with Rin directly.
+    *   **Rest Mode (Yellow)**: Activates after 120s of inactivity. Rin pauses observation to save resources.
+*   **Sequential Chat**: Rin communicates in natural, paced bursts (split messages) rather than long blocks of text.
+*   **Stealth User Mode**: Launches completely silently in the background via `start.bat`.
+*   **Chat Interface**: A clean, modern chat UI with smooth animations and "glass" aesthetics.
 
-## Roadmap & Future Implementations
+## Roadmap & Future Implementations: Rin's Thinking System
 
-*   **Edge Intelligence**: We are implementing true edge intelligence concepts. Future versions will allow Rin to create her own data structures and store memories based on your PC contents and day-to-day activities, tailoring her personality and knowledge specifically to you.
-*   **Local LLM (Ollama)**: We plan to verify and implement Ollama support as an alternative to Gemini. This will allow for easier, free, and unlimited access to the companion using local hardware.
-*   **Compact View**: A less obstructive and more minimal UI
-*   **Vocalized Responses and Microphone Inputs**: An optional system of communication where users can enable vocal communication instead of chat bubbles displayed by the companion, as well as an optional voice recording where users can chat with the companion using a microphone.
+**Goal:** Transform Rin into a Cloud-Accelerated Edge Intelligence that thinks before speaking and learns continuously.
+
+### Phase 1: Real-Time Thinking (Active Mode)
+*   **Observation Buffer**: Accumulate observations (last 5-10) instead of immediate reactions.
+*   **Thinking Pauses**: Periodic analysis (every 45s) to determine significance.
+*   **Significance Detection**: Filter repetitive actions; only trigger for meaningful changes (new activity, deep focus).
+*   **Thoughtful Responses**: Gemini generates intentional messages or chooses `STAY_QUIET` to reduce noise by ~90%.
+
+### Phase 2: Deep Thinking (Idle Mode)
+*   **Idle Detection**: Triggers after 2 minutes of inactivity.
+*   **Edge Knowledge Organization**: Merge duplicate knowledge, decay old items, and rebuild graph connections locally.
+*   **Pattern Analysis**: Identify workflows and temporal habits.
+*   **Gemini Validation**: Send top insights to the cloud for validation and deepening.
+*   **Response Pre-computation**: Generate and cache 3-5 responses for likely future contexts while user is AFK.
+
+### Phase 3: Data Structure Improvements
+*   **Hierarchical Knowledge Graph**: Tiers for Core Identity, Working Memory, and Episodic Memory.
+*   **Knowledge Decay**: Automatic confidence decay for unused information.
+*   **Smart Caching**: Context-hash based caching with LRU eviction and TTL.
+
+### Phase 4: UX & Integration
+*   **Thinking Indicators**: Visual status for "Thinking" or "Deep Reflection".
+*   **Proactive Insight Sharing**: Share deep thoughts discovered during idle time (based on relevance).
+*   **"What are you thinking?"**: Feature to ask Rin about her current internal reflections.
+*   **Personality Consistency**: Enforce tone consistency across edge and cloud responses.
+
+### Architecture Principles
+*   **Thin Client / Thick Edge**: Default to local computation; use cloud strategically.
+*   **Dual Thinking Modes**: Real-time (45s) + Deep (Idle).
+*   **Cost-Conscious**: Drastic API reduction through buffering and significance checks.
 
 ## Getting Started
 
@@ -49,7 +77,7 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
     *   Install Python dependencies.
     *   Install Node.js dependencies for the frontend.
 
-    > **⚠️ IMPORTANT SETUP NOTE:**
+    > **Important Note:**
     > Unfortunately setup.bat is currently bugged, if you are updating or installing Python or Node.js please restart immediately after setup.bat,
     > then relaunch the setup batch file after restart to finishes the install for those, otherwise you will keep looping on the installation.
     > This may force you to do more than 1 restart and setup initializations.
@@ -57,24 +85,34 @@ Rin is an intelligent, visually-aware desktop companion designed to quietly supp
 
 3.  **Configure API Key**:
     *   Create a file named `GEMINI_API_KEY.txt` in the root directory.
-    *   Paste your Gemini API key inside it (starts with `AIza...`).
+    *   Paste your Gemini API key inside it.
 
 ### Usage
 
 *   **Start Rin**: Double-click **`start.bat`**.
-    *   This launches Rin in **User Mode** (Silent backend, no debug consoles).
+    *   This launches Rin in **User Mode**.
 *   **Debug Mode**: If you need to see logs or troubleshoot, use `debug.bat`.
 *   **Shutdown**: Click the Power button in the Rin header to cleanly shut down both the UI and the background brain.
 
 ## Personalization
 
-You can teach Rin about yourself by editing `user_profile.txt` in the root directory:
+You can inform Rin about yourself by editing `user_profile.txt` in the root directory:
 ```text
 Username=YourName
 DateOfBirth=January 1
 Interests=Coding, Gaming, Sci-Fi
 Dislikes=Spiders, Lag
 ```
+
+## Reporting Issues
+
+If you encounter any bugs or issues, please report them via the **[GitHub Issues](https://github.com/clorece/rin/issues)** tab.
+
+**When reporting a bug, please:**
+1.  Describe the issue clearly.
+2.  Attach your **`backend.log`** file (located in the `logs/` folder).
+    *   *Note: Check the log for any sensitive information before sharing, though it mostly contains system status and error traces.*
+3.  Include steps to reproduce the problem if possible.
 
 ## Credits
 
