@@ -7,8 +7,7 @@
   <br>
   <sub>Image used for profile picture by daisukerichard on x! Please see credits below!</sub>
 </div>
-
-
+<br />
 
 Rin is an intelligent, **visually and audio-aware** desktop companion designed to quietly support your digital life. She observes your screen, hears your system audio, and understands your context, offering guidance or company when you need it. **All your data and memories are stored locally on your machine**, ensuring your privacy and security.
 
