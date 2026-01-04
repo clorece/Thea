@@ -90,7 +90,7 @@ function App() {
 
         const poll = async () => {
             const update = await getUpdates();
-            if (update && (update.type === 'reaction' || update.type === 'proactive' || update.type === 'chat')) {
+            if (update && (update.type === 'reaction' || update.type === 'proactive' || update.type === 'chat' || update.type === 'recommendation')) {
                 if (update.type === 'chat') {
                     setExternalChatMessage(update.description);
                 }

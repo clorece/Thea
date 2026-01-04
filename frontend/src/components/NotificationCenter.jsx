@@ -54,11 +54,11 @@ export default function NotificationCenter({ notifications = [] }) {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                             style={{
-                                background: 'rgba(0, 0, 0, 0.6)',
+                                background: notif.type === 'recommendation' ? 'rgba(234, 179, 8, 0.15)' : 'rgba(0, 0, 0, 0.6)',
                                 backdropFilter: 'blur(12px)',
                                 padding: '10px 14px',
                                 borderRadius: '16px',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                border: notif.type === 'recommendation' ? '1px solid rgba(234, 179, 8, 0.4)' : '1px solid rgba(255,255,255,0.1)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '12px',

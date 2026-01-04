@@ -276,37 +276,47 @@ async def process_observation(window_title, image_b64, trigger_type=None):
                     print(f"[Knowledge] Gemini insight: {gemini_result.get('insight')}")
                     log_activity("LEARNING", f"({gemini_result.get('learning_category', 'general')}): {gemini_result.get('insight')}")
                 
-                # If Gemini generated a proactive message, check for staleness before queuing
+                # Handle Recommendations (High Priority - Bypass Staleness Check)
+                if gemini_result.get("recommendation"):
+                    reaction_queue.append({
+                        "type": "recommendation",
+                        "content": "💡", # Icon for frontend if it falls back
+                        "description": gemini_result["recommendation"]
+                    })
+                    log_activity("RECOMMENDATION", f"{gemini_result['recommendation']}")
+
+                # Handle Proactive Comments (Low Priority - Check Staleness)
                 if gemini_result.get("proactive"):
-                    # Check if user has switched contexts while we were thinking
                     current_title = get_active_window_title()
-                    # Simple heuristic: If title changed significantly, user moved on.
-                    # Ideally check App Name, but title is a good proxy for major shifts.
                     if current_title != window_title:
-                         print(f"[Knowledge] Insight skipped (Stale): {current_title} != {window_title}")
-                         log_activity("SKIPPED", f"Stale Insight (User switched to '{current_title}'): {gemini_result['proactive']}")
+                         print(f"[Knowledge] Comment skipped (Stale): {current_title} != {window_title}")
+                         log_activity("SKIPPED", f"Stale Comment: {gemini_result['proactive']}")
                     else:
                         reaction_queue.append({
                             "type": "proactive",
                             "content": "",
                             "description": gemini_result["proactive"]
                         })
-                        log_activity("INSIGHT", f"Proactive ({gemini_result.get('learning_category', 'general')}): {gemini_result['proactive']}")
+                        log_activity("INSIGHT", f"Proactive: {gemini_result['proactive']}")
             except Exception as e:
                 print(f"[Knowledge] Gemini learning failed: {e}")
         
         print(f"Analysis: {result}")
         
-        # Add to reaction queue for frontend
-        reaction_queue.append({
-            "type": "reaction",
-            "content": result['reaction'],
-            "description": result['description']
-        })
-        
-        # Log Activity
+        # Add to reaction queue for frontend (Standard Reaction)
+        # Check staleness for this too to prevent leaks!
+        current_title_now = get_active_window_title()
+        if current_title_now == window_title:
+            reaction_queue.append({
+                "type": "reaction",
+                "content": result['reaction'],
+                "description": result['description']
+            })
+            log_activity("REACTION", result['description'])
+        else:
+            log_activity("SKIPPED", f"Stale Reaction: {result['description']}")
+            
         log_activity("OBSERVATION", f"Window: {window_title} | App: {app_name}")
-        log_activity("REACTION", result['description'])
         
     except Exception as e:
         print(f"Analysis failed: {e}")

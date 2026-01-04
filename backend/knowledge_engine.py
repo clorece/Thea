@@ -145,9 +145,27 @@ class KnowledgeEngine:
             result["insight"] = learning
             print(f"[Knowledge] Gemini learned: {learning}")
         
-        # Handle proactive insights from Gemini
-        if learning_result.get("proactive_message"):
-            proactive_msg = learning_result["proactive_message"]
+        # Debug: Print raw keys to verify what LLM sent
+        print(f"[Knowledge] Raw LLM Keys: {list(learning_result.keys())}")
+
+        # Handle Recommendations (High Priority)
+        if learning_result.get("recommendation"):
+            rec_msg = learning_result["recommendation"]
+            confidence = learning_result.get("confidence", 0.8) # Default high confidence for recs
+            
+            # Store
+            database.add_rin_insight(
+                insight_type="recommendation", # New type in DB meta if needed, or just mapped
+                content=rec_msg,
+                context={"window_title": window_title, "app": app_name},
+                relevance_score=confidence
+            )
+            result["recommendation"] = rec_msg
+            print(f"[Knowledge] Gemini recommendation: {rec_msg}")
+        
+        # Handle proactive insights from Gemini (Support both keys)
+        proactive_msg = learning_result.get("proactive") or learning_result.get("proactive_message")
+        if proactive_msg:
             confidence = learning_result.get("confidence", 0.5)
             
             # Store as a Rin insight

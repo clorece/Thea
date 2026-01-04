@@ -475,14 +475,16 @@ Analyze this screen (and audio if provided) and answer:
    - If you hear music, identify the genre/mood and store it as a 'preference'.
    - If you hear game sounds, identify the game type and store it as an 'interest'.
 3. CATEGORY: If there's a learning, what category? (interest, workflow, habit, preference, or null)
-4. PROACTIVE: Should I share an observation with the user now? If yes, write a bubbly, supportive 1-sentence message matching the audio's vibe. If not, null.
-   - DEEP INSIGHTS (PRIORITY): If the user is CODING, prefer making a specific code suggestion (e.g., "Maybe try a list comprehension here?") over a generic comment.
-   - If the user is WRITING, prefer suggesting a grammar fix or stronger phrasing.
-   - NOTE: Keep these suggestions OPTIONAL and POLITE ("You could try doing X..."). Don't be bossy.
-5. CONFIDENCE: How confident am I in these assessments? (0.0 to 1.0)
+4. RECOMMENDATION: Specific, useful advice (code/grammar). Try to find one!
+   - If User is CODING: ACTIVELY LOOK for a specific refactor, cleaner syntax, or optimization (e.g., "Use list comprehension", "Add type hint").
+   - If User is WRITING: suggest a grammar fix or stronger phrasing.
+   - NOTE: Keep it OPTIONAL and POLITE. "Maybe try..."
+5. PROACTIVE: A bubbly, supportive 1-sentence comment. Null if none.
+   - Use this for general reactions ("Wow, that looks complex!", "Great music taste!").
+6. CONFIDENCE: How confident am I in these assessments? (0.0 to 1.0)
 
 Respond ONLY with valid JSON in this exact format:
-{{"is_new": true, "learning": "User enjoys lo-fi music while coding", "category": "preference", "proactive": null, "confidence": 0.7}}
+{{"is_new": true, "learning": "...", "category": "preference", "recommendation": "Try using list comprehension...", "proactive": "You're crushing it!", "confidence": 0.7}}
 """
             
             content_parts = [prompt, image]
