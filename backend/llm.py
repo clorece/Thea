@@ -4,7 +4,26 @@ import time
 import re
 
 # Attempt to configure from environment or files
+import datetime
+
 API_KEY = os.environ.get("GEMINI_API_KEY")
+
+def log_api_usage(endpoint, status="Success", details=""):
+    """
+    Logs API usage to logs/api_usage.log for tracking rate limits.
+    """
+    try:
+        log_dir = os.path.join(os.path.dirname(__file__), "..", "logs")
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+            
+        log_path = os.path.join(log_dir, "api_usage.log")
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"[{timestamp}] Endpoint: {endpoint} | Status: {status} | {details}\n")
+    except Exception as e:
+        print(f"Failed to log API usage: {e}")
 
 if not API_KEY:
     # Try reading from file (Dev first, then User)
@@ -167,6 +186,7 @@ class RinMind:
             text = response.text.strip()
             
             # Simple text return, no splitting needed
+            log_api_usage("analyze_image", "Success")
             return {"reaction": "", "description": text}
 
         except Exception as e:
@@ -279,6 +299,8 @@ class RinMind:
             response = await self.model.generate_content_async(content_parts)
             text = response.text.strip()
             
+            details = "Visual + Audio" if audio_bytes else "Visual Only"
+            log_api_usage("analyze_image_async", "Success", details)
             return {"reaction": "", "description": text}
 
         except Exception as e:
@@ -329,6 +351,7 @@ class RinMind:
             
             chat = self.model.start_chat(history=history)
             response = chat.send_message(extended_message)
+            log_api_usage("chat_response", "Success")
             return response.text
         except Exception as e:
             print(f"Error in chat: {e}")
@@ -381,6 +404,8 @@ class RinMind:
             
             # Use generate_content for multimodal, not chat (which doesn't support audio inline)
             response = await self.model.generate_content_async(content_parts)
+            details = "Visual + Audio" if audio_bytes else "Visual Only"
+            log_api_usage("chat_response_async", "Success", details)
             return response.text
             
         except Exception as e:
@@ -478,6 +503,8 @@ Respond ONLY with valid JSON in this exact format:
                     "proactive_message": data.get("proactive"),
                     "confidence": float(data.get("confidence", 0.5))
                 }
+                details = "Visual + Audio" if audio_bytes else "Visual Only"
+                log_api_usage("analyze_for_learning", "Success", details)
             except json.JSONDecodeError:
                 print(f"[Learning] Failed to parse Gemini response: {text[:100]}")
                 return {
