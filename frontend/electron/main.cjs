@@ -12,6 +12,8 @@ function createWindow() {
         y: height - 770, // Anchor to bottom with 20px padding (750 + 20)
         transparent: true,
         frame: false,
+        titleBarStyle: 'hidden',
+        autoHideMenuBar: true, // Ensure menu bar is hidden
         resizable: false, // User cannot resize manually
         alwaysOnTop: true,
         webPreferences: {
@@ -20,6 +22,8 @@ function createWindow() {
             contextIsolation: true,
         },
     });
+
+    mainWindow.setMenu(null); // Explicitly remove the menu
 
     // Handle Resize Request from Renderer
     ipcMain.on('resize-window', (event, { width, height }) => {
