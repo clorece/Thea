@@ -137,40 +137,53 @@ async def get_screen_capture(analyze: bool = False):
     
     # -- Smart Trigger Logic --
     # 1. Title Change: Immediate
-    # 2. Visual Change: If timer > 3s AND significant visual difference
-    # 3. Force Update: If timer > 30s (sanity check)
+    # 2. Audio Spike: Immediate (independent of visual cooldown)
+    # 3. Visual Change: If timer > 5s AND significant visual difference (>5%)
+    # 4. Force Update: If timer > 30s (sanity check)
     
     import time
     should_trigger = False
+    trigger_type = None
     current_time = time.time()
     visual_diff = 0.0
     
+    # Check Audio Spike (independent trigger)
+    _, volume_delta = ears.get_volume_delta()
+    if volume_delta > 0.15:  # Significant volume increase (silence -> sound)
+        print(f"[Trigger] Audio spike detected: delta={volume_delta:.3f}")
+        should_trigger = True
+        trigger_type = "audio"
+    
     # Check Title Change
-    if title != last_analyzed_title:
+    if not should_trigger and title != last_analyzed_title:
         print(f"[Trigger] Title changed: '{last_analyzed_title}' -> '{title}'")
         should_trigger = True
+        trigger_type = "title"
     
-    # Check Timer & Visuals
-    elif (current_time - last_trigger_time) > 3.0:
+    # Check Timer & Visuals (only if no audio/title trigger)
+    if not should_trigger and (current_time - last_trigger_time) > 5.0:
         # Only check visual difference if enough time has passed to matter
         if last_analyzed_image:
             visual_diff = calculate_visual_difference(last_analyzed_image, image_b64)
-            # Threshold: 2.5% specific difference (enough to ignore clock seconds changing, etc)
-            if visual_diff > 2.5:
-                print(f"[Trigger] Visual Diff: {visual_diff:.2f}% (> 2.5%)")
+            # Threshold: 5% difference (tuned from 2.5% to reduce noise)
+            if visual_diff > 5.0:
+                print(f"[Trigger] Visual Diff: {visual_diff:.2f}% (> 5%)")
                 should_trigger = True
+                trigger_type = "visual"
             elif (current_time - last_trigger_time) > 30.0:
                  # Force update every 30s even if static, just to be alive
                  print(f"[Trigger] Force update (30s timeout)")
                  should_trigger = True
+                 trigger_type = "force"
         else:
             should_trigger = True
+            trigger_type = "initial"
             
     if analyze and should_trigger:
         last_analyzed_title = title
         last_trigger_time = current_time
         last_analyzed_image = image_b64  # Update last seen image
-        asyncio.create_task(process_observation(title, image_b64))
+        asyncio.create_task(process_observation(title, image_b64, trigger_type=trigger_type))
         
     return {
         "status": "ok",
@@ -179,7 +192,7 @@ async def get_screen_capture(analyze: bool = False):
         "diff": visual_diff
     }
 
-async def process_observation(window_title, image_b64):
+async def process_observation(window_title, image_b64, trigger_type=None):
     """Background task to analyze screen and store memory."""
     try:
         image_bytes = base64.b64decode(image_b64)
@@ -191,7 +204,7 @@ async def process_observation(window_title, image_b64):
         else:
             print(f"[Ears] No audio captured (running={ears.running}, buffer_size={len(ears.audio_buffer)})")
         
-        result = await mind.analyze_image_async(image_bytes, audio_bytes=audio_bytes)
+        result = await mind.analyze_image_async(image_bytes, audio_bytes=audio_bytes, trigger_type=trigger_type)
         
         # Store in DB
         content = f"User is processing: {window_title}. Observation: {result['description']}"

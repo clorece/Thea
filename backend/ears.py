@@ -187,6 +187,20 @@ class Ears:
             last_chunk = self.audio_buffer[-1]
             return float(np.max(np.abs(last_chunk)))
 
+    def get_volume_delta(self):
+        """
+        Get the change in volume since last check.
+        Returns a tuple: (current_volume, delta)
+        Delta > 0 means volume increased, < 0 means decreased.
+        """
+        current = self.get_current_volume()
+        delta = current - self._last_volume
+        self._last_volume = current
+        return (current, delta)
+
+
+# Initialize last_volume tracker
+Ears._last_volume = 0.0
 
 # Singleton instance
 ears = Ears()

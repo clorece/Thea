@@ -233,9 +233,10 @@ class RinMind:
             print(f"Error loading episodic memory: {e}")
             return ""
 
-    async def analyze_image_async(self, image_bytes, audio_bytes=None):
+    async def analyze_image_async(self, image_bytes, audio_bytes=None, trigger_type=None):
         """
         Analyzes an image (and optional audio) and returns a short reaction and description (Async).
+        trigger_type: The type of trigger that initiated this analysis (audio, visual, title, force).
         Returns: { "reaction": "Emoji", "description": "Text" }
         """
         if not self.model:
@@ -300,6 +301,8 @@ class RinMind:
             text = response.text.strip()
             
             details = "Visual + Audio" if audio_bytes else "Visual Only"
+            if trigger_type:
+                details = f"{details} | Trigger: {trigger_type}"
             log_api_usage("analyze_image_async", "Success", details)
             return {"reaction": "", "description": text}
 
