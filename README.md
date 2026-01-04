@@ -5,7 +5,7 @@
 <div align="center">
   <img src="frontend/src/assets/rin-showcase.jpg" alt="Rin Profile Picture" width="500"/>
   <br>
-  <sub>Image used for profile picture by daisukerichard on x! Please see credits below!</sub>
+  <sub>Image used for profile picture by @daisukerichard on x! Please see credits below!</sub>
 </div>
 <br />
 
