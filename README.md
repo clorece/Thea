@@ -123,9 +123,13 @@ If you encounter any bugs or issues, please report them via the **[GitHub Issues
 
 **When reporting a bug, please:**
 1.  Describe the issue clearly.
-2.  Attach your **`backend.log`** file (located in the `logs/` folder).
-    *   *Note: Check the log for any sensitive information before sharing, though it mostly contains system status and error traces.*
-3.  Include steps to reproduce the problem if possible.
+2.  **Attach a Screenshot** of the error or issue if possible.
+3.  **Attach relevant logs** from the `logs/` folder:
+    *   **`error.log`**: For crashes or critical errors (Most Important).
+    *   **`backend.log`**: For general system status.
+    *   **`api_usage.log`**: If the issue relates to Rin not seeing/hearing or API limits.
+    *   *(Note: Logs are auto-cleared on startup, so please reproduce the bug and then upload the logs immediately.)*
+4.  Include steps to reproduce the problem.
 
 ## Credits
 
