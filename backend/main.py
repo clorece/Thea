@@ -276,14 +276,22 @@ async def process_observation(window_title, image_b64, trigger_type=None):
                     print(f"[Knowledge] Gemini insight: {gemini_result.get('insight')}")
                     log_activity("LEARNING", f"({gemini_result.get('learning_category', 'general')}): {gemini_result.get('insight')}")
                 
-                # If Gemini generated a proactive message, add it to reaction queue
+                # If Gemini generated a proactive message, check for staleness before queuing
                 if gemini_result.get("proactive"):
-                    reaction_queue.append({
-                        "type": "proactive",
-                        "content": "",
-                        "description": gemini_result["proactive"]
-                    })
-                    log_activity("INSIGHT", f"Proactive ({gemini_result.get('learning_category', 'general')}): {gemini_result['proactive']}")
+                    # Check if user has switched contexts while we were thinking
+                    current_title = get_active_window_title()
+                    # Simple heuristic: If title changed significantly, user moved on.
+                    # Ideally check App Name, but title is a good proxy for major shifts.
+                    if current_title != window_title:
+                         print(f"[Knowledge] Insight skipped (Stale): {current_title} != {window_title}")
+                         log_activity("SKIPPED", f"Stale Insight (User switched to '{current_title}'): {gemini_result['proactive']}")
+                    else:
+                        reaction_queue.append({
+                            "type": "proactive",
+                            "content": "",
+                            "description": gemini_result["proactive"]
+                        })
+                        log_activity("INSIGHT", f"Proactive ({gemini_result.get('learning_category', 'general')}): {gemini_result['proactive']}")
             except Exception as e:
                 print(f"[Knowledge] Gemini learning failed: {e}")
         
