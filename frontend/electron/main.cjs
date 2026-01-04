@@ -12,9 +12,7 @@ function createWindow() {
         y: height - 770, // Anchor to bottom with 20px padding (750 + 20)
         transparent: true,
         frame: false,
-        titleBarStyle: 'hidden',
-        autoHideMenuBar: true, // Ensure menu bar is hidden
-        resizable: false, // User cannot resize manually
+        resizable: false,
         alwaysOnTop: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.cjs'),
