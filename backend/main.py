@@ -274,6 +274,7 @@ async def process_observation(window_title, image_b64, trigger_type=None):
                 
                 if gemini_result.get("learned"):
                     print(f"[Knowledge] Gemini insight: {gemini_result.get('insight')}")
+                    log_activity("LEARNING", f"({gemini_result.get('learning_category', 'general')}): {gemini_result.get('insight')}")
                 
                 # If Gemini generated a proactive message, add it to reaction queue
                 if gemini_result.get("proactive"):
