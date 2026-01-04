@@ -9,8 +9,9 @@ def get_active_window_title():
     try:
         w = win32gui.GetForegroundWindow()
         return win32gui.GetWindowText(w)
-    except Exception as e:
-        return f"Error getting window: {e}"
+    except Exception:
+        # Prevent information leakage via stack trace
+        return "Unknown"
 
 def capture_screen_base64(scale=0.75):
     """
