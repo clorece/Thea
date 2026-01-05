@@ -349,6 +349,102 @@ class KnowledgeEngine:
     def mark_insight_delivered(self, insight_id: int, feedback: str = None):
         """Mark an insight as delivered to the user."""
         database.mark_insight_shared(insight_id, feedback)
+    
+    def organize_knowledge(self):
+        """
+        Organize and clean up knowledge during idle time.
+        Called during deep thinking mode.
+        """
+        try:
+            conn = database.get_db_connection()
+            c = conn.cursor()
+            
+            # 1. Merge duplicate knowledge entries
+            # Find entries with same category and similar keys
+            c.execute("""
+                SELECT id, category, key, value, confidence, evidence_count
+                FROM user_knowledge
+                ORDER BY category, key, confidence DESC
+            """)
+            rows = c.fetchall()
+            
+            seen = {}
+            to_delete = []
+            
+            for row in rows:
+                entry_key = f"{row['category']}:{row['key']}"
+                if entry_key in seen:
+                    # Merge into the first (higher confidence) entry
+                    master_id = seen[entry_key]
+                    c.execute("""
+                        UPDATE user_knowledge 
+                        SET evidence_count = evidence_count + ?,
+                            confidence = MIN(1.0, confidence + 0.05)
+                        WHERE id = ?
+                    """, (row['evidence_count'], master_id))
+                    to_delete.append(row['id'])
+                else:
+                    seen[entry_key] = row['id']
+            
+            # Delete duplicates
+            for row_id in to_delete:
+                c.execute("DELETE FROM user_knowledge WHERE id = ?", (row_id,))
+            
+            # 2. Archive very old, low-confidence entries
+            c.execute("""
+                DELETE FROM user_knowledge
+                WHERE confidence < 0.2 
+                AND updated_at < date('now', '-30 days')
+            """)
+            archived = c.rowcount
+            
+            # 3. Clean up old context embeddings (keep only last 1000)
+            c.execute("""
+                DELETE FROM context_embeddings
+                WHERE id NOT IN (
+                    SELECT id FROM context_embeddings
+                    ORDER BY last_seen DESC
+                    LIMIT 1000
+                )
+            """)
+            
+            conn.commit()
+            conn.close()
+            
+            if to_delete or archived > 0:
+                print(f"[Knowledge] Organized: merged {len(to_delete)} duplicates, archived {archived} old entries")
+                
+        except Exception as e:
+            print(f"[Knowledge] Organization error: {e}")
+    
+    def apply_confidence_decay(self):
+        """
+        Apply confidence decay to knowledge based on age.
+        Implements: confidence = confidence * (0.95 ^ weeks_since_update)
+        Called periodically during deep thinking.
+        """
+        try:
+            conn = database.get_db_connection()
+            c = conn.cursor()
+            
+            # Only decay entries that haven't been decayed in the last week
+            c.execute("""
+                UPDATE user_knowledge
+                SET confidence = confidence * 0.95,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE updated_at < date('now', '-7 days')
+                AND confidence > 0.1
+            """)
+            
+            decayed = c.rowcount
+            conn.commit()
+            conn.close()
+            
+            if decayed > 0:
+                print(f"[Knowledge] Applied decay to {decayed} knowledge entries")
+                
+        except Exception as e:
+            print(f"[Knowledge] Decay error: {e}")
 
 
 # Singleton instance

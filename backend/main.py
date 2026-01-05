@@ -19,7 +19,7 @@ import asyncio
 from io import BytesIO
 from PIL import Image, ImageChops, ImageStat
 import database
-from llm import mind, split_into_chunks
+from llm import mind, split_into_chunks, get_api_session_stats
 from capture import capture_screen_base64, get_active_window_title
 from activity_tracker import activity_collector
 from pattern_engine import pattern_engine
@@ -27,6 +27,7 @@ from learning_config import get_config, update_config
 from knowledge_engine import knowledge_engine
 from ears import ears
 from logger import log_activity, clear_activity_log
+from thinking_engine import thinking_engine, ThinkingState
 
 # -- Data Models --
 class ChatMessage(BaseModel):
@@ -50,6 +51,7 @@ last_trigger_time = 0
 last_seen_image = None
 last_screen_change_time = 0
 last_recommendation_time = 0  # Cooldown for recommendations
+thinking_enabled = True  # Feature flag for thinking system
 
 # -- Lifecycle Events --
 @app.on_event("startup")
@@ -64,9 +66,8 @@ async def startup_event():
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        # Clear specific logs but PRESERVE activity.log if possible, or append marker
-        # User reported "activity log empty", so let's append a session marker instead of clearing
-        for log_file in ["api_usage.log", "error.log", "backend.log"]:
+        # Clear all logs on startup for a fresh session
+        for log_file in ["api_usage.log", "error.log", "backend.log", "activity.log"]:
             path = os.path.join(log_dir, log_file)
             if os.path.exists(path):
                 with open(path, "w") as f:
@@ -84,6 +85,11 @@ async def startup_event():
     print("[Startup] Starting ears (audio capture)...")
     ears.start()
     
+    # Start thinking cycle background task
+    if thinking_enabled:
+        asyncio.create_task(thinking_cycle_loop())
+        print("[Startup] Thinking system enabled")
+    
     # Verify logging works
     log_activity("SYSTEM", "Rin Backend Started - Logging Active")
 
@@ -98,6 +104,106 @@ async def shutdown_event():
 # Local log_activity removed in favor of logger module
 
 
+# ============== Thinking System ==============
+
+async def thinking_cycle_loop():
+    """Background loop that runs thinking cycles periodically."""
+    print("[Thinking] Background thinking loop started")
+    await asyncio.sleep(10)  # Initial delay to let system stabilize
+    
+    while True:
+        try:
+            # Update thinking state
+            state = thinking_engine.update_state()
+            
+            # Run thinking cycle if it's time
+            if thinking_engine.should_run_thinking_cycle():
+                result = await thinking_engine.run_thinking_cycle()
+                
+                # Process significant observations through Gemini
+                for obs in result.significant_observations:
+                    if obs.image_bytes:
+                        thinking_engine.increment_gemini_calls()
+                        await process_significant_observation(obs)
+            
+            # Deep thinking during idle
+            if state == ThinkingState.DEEP_REFLECTION:
+                await run_deep_thinking()
+            
+        except Exception as e:
+            print(f"[Thinking] Cycle error: {e}")
+        
+        # Sleep until next check (5 seconds for responsiveness)
+        await asyncio.sleep(5)
+
+
+async def process_significant_observation(obs):
+    """Process a significant observation through Gemini."""
+    try:
+        # This is where Gemini gets called for truly significant observations
+        gemini_result = await knowledge_engine.process_observation_with_gemini(
+            image_bytes=obs.image_bytes,
+            window_title=obs.window_title,
+            app_name=obs.app_name,
+            app_category=obs.app_category,
+            audio_bytes=obs.audio_bytes
+        )
+        
+        # Handle recommendations
+        rec_content = gemini_result.get("recommendation")
+        if rec_content and rec_content.lower() != "null" and thinking_engine.can_notify():
+            thinking_engine.mark_notification_sent()
+            
+            reaction_queue.append({
+                "type": "recommendation",
+                "content": "💡",
+                "description": rec_content
+            })
+            
+            database.add_memory(
+                "chat",
+                rec_content,
+                meta={"role": "model", "is_recommendation": True}
+            )
+            
+            log_activity("RECOMMENDATION", f"{rec_content}")
+            print(f"[Thinking] Significant recommendation: {rec_content}")
+            
+    except Exception as e:
+        print(f"[Thinking] Gemini processing failed: {e}")
+
+
+async def run_deep_thinking():
+    """Run deep thinking tasks during user idle time."""
+    try:
+        # Knowledge organization
+        knowledge_engine.organize_knowledge()
+        
+        # Apply confidence decay (weekly)
+        knowledge_engine.apply_confidence_decay()
+        
+        # Pattern analysis
+        pattern_engine.analyze_all(force=True)
+        
+        print("[Thinking] Deep thinking cycle completed")
+        
+    except Exception as e:
+        print(f"[Thinking] Deep thinking error: {e}")
+
+
+@app.get("/thinking/status")
+def get_thinking_status():
+    """Get current thinking system status."""
+    return thinking_engine.get_status()
+
+
+@app.get("/thinking/thoughts")
+def get_pending_thoughts():
+    """Get any thoughts Rin wants to share."""
+    thoughts = thinking_engine.get_pending_thoughts()
+    return {"thoughts": thoughts, "count": len(thoughts)}
+
+
 @app.get("/")
 def read_root():
     return {"status": "Rin Backend is running", "learning": activity_collector.is_running()}
@@ -105,6 +211,22 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "ok", "learning_active": activity_collector.is_running()}
+
+
+@app.get("/api/usage")
+def get_api_usage():
+    """Get real-time API usage statistics for this session."""
+    stats = get_api_session_stats()
+    thinking_stats = thinking_engine.get_status().get("stats", {})
+    return {
+        "gemini": stats,
+        "thinking": {
+            "observations_total": thinking_stats.get("observations_total", 0),
+            "observations_deduplicated": thinking_stats.get("observations_deduplicated", 0),
+            "significant_count": thinking_stats.get("significant_count", 0),
+            "gemini_calls_from_thinking": thinking_stats.get("gemini_calls", 0)
+        }
+    }
 
 
 def calculate_visual_difference(img_b64_1, img_b64_2):
@@ -211,7 +333,7 @@ async def get_screen_capture(analyze: bool = False):
     }
 
 async def process_observation(window_title, image_b64, trigger_type=None):
-    """Background task to analyze screen and store memory."""
+    """Background task to analyze screen and optionally buffer for thinking."""
     try:
         image_bytes = base64.b64decode(image_b64)
         
@@ -222,6 +344,7 @@ async def process_observation(window_title, image_b64, trigger_type=None):
         else:
             print(f"[Ears] No audio captured (running={ears.running}, buffer_size={len(ears.audio_buffer)})")
         
+        # Always get basic reaction for immediate UI feedback
         result = await mind.analyze_image_async(image_bytes, audio_bytes=audio_bytes, trigger_type=trigger_type)
         
         # Store in DB
@@ -239,7 +362,7 @@ async def process_observation(window_title, image_b64, trigger_type=None):
         except:
             pass
         
-        # Rule-based knowledge extraction (Phase 2A)
+        # Rule-based knowledge extraction (still runs - it's cheap/local)
         knowledge_result = knowledge_engine.process_observation(
             window_title=window_title or "",
             app_name=app_name or "",
@@ -250,60 +373,51 @@ async def process_observation(window_title, image_b64, trigger_type=None):
         if knowledge_result.get("learned"):
             print(f"[Knowledge] Rule-based learning extracted")
         
-        # Vision-based Gemini learning (Phase 2B) - runs less frequently
-        # Only run deep learning analysis every ~3 observations to save API calls
-        import random
-        if random.random() < 0.4:  # 40% of observations get deep analysis (Bumped from 10%)
-            try:
-                gemini_result = await knowledge_engine.process_observation_with_gemini(
-                    image_bytes=image_bytes,
-                    window_title=window_title or "",
-                    app_name=app_name or "",
-                    app_category=app_category,
-                    audio_bytes=audio_bytes
-                )
-                
-                # if gemini_result.get("learned"):
-                #     # Silenced per user request (Recommendations Only)
-                #     pass
-                
-                # Handle Recommendations (High Priority - The ONLY thing we listen to now)
-                # Add cooldown to prevent spam
-                import time as time_module
-                rec_content = gemini_result.get("recommendation")
-                
-                # Filter out literal "null" strings and apply 60s cooldown
-                if rec_content and rec_content.lower() != "null":
-                    global last_recommendation_time
-                    try:
-                        last_rec_time = last_recommendation_time
-                    except NameError:
-                        last_rec_time = 0
+        # ============== THINKING SYSTEM INTEGRATION ==============
+        # Instead of calling Gemini directly, buffer the observation
+        # The thinking cycle will determine if it's significant enough for Gemini
+        
+        if thinking_enabled:
+            # Buffer this observation for the thinking system
+            buffered = thinking_engine.buffer_observation(
+                window_title=window_title or "",
+                app_name=app_name or "",
+                app_category=app_category,
+                image_bytes=image_bytes,
+                audio_bytes=audio_bytes
+            )
+            
+            if buffered:
+                print(f"[Thinking] Observation buffered (buffer size: {len(thinking_engine.observation_buffer)})")
+            else:
+                print(f"[Thinking] Observation deduplicated")
+        else:
+            # Fallback: Old behavior when thinking is disabled
+            import random
+            if random.random() < 0.1:  # Reduced to 10% when fallback
+                try:
+                    gemini_result = await knowledge_engine.process_observation_with_gemini(
+                        image_bytes=image_bytes,
+                        window_title=window_title or "",
+                        app_name=app_name or "",
+                        app_category=app_category,
+                        audio_bytes=audio_bytes
+                    )
                     
-                    if time_module.time() - last_rec_time > 15:  # 15 second cooldown
-                        last_recommendation_time = time_module.time()
-                        
-                        # 1. Send to Notification
-                        reaction_queue.append({
-                            "type": "recommendation",
-                            "content": "💡",
-                            "description": rec_content
-                        })
-                        
-                        # 2. Add to Chat History (So user sees it in box)
-                        database.add_memory(
-                            memory_type="chat",
-                            content=rec_content,
-                            meta={"role": "model", "is_recommendation": True}
-                        )
-                        
-                        print(f"[Knowledge] Gemini recommendation: {rec_content}")
-                        log_activity("RECOMMENDATION", f"{rec_content}")
-                    else:
-                        print(f"[Knowledge] Recommendation throttled (cooldown): {rec_content[:30]}...")
-                        log_activity("THROTTLED", f"Recommendation (Cooldown): {rec_content[:30]}...")
-            except Exception as e:
-                print(f"[Knowledge] Gemini learning failed: {e}")
+                    rec_content = gemini_result.get("recommendation")
+                    if rec_content and rec_content.lower() != "null":
+                        import time as time_module
+                        global last_recommendation_time
+                        if time_module.time() - last_recommendation_time > 30:
+                            last_recommendation_time = time_module.time()
+                            reaction_queue.append({
+                                "type": "recommendation",
+                                "content": "💡",
+                                "description": rec_content
+                            })
+                            log_activity("RECOMMENDATION", f"{rec_content}")
+                except Exception as e:
+                    print(f"[Knowledge] Gemini learning failed: {e}")
         
         print(f"Analysis: {result}")
         

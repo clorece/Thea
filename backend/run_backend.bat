@@ -8,6 +8,10 @@ if not exist ..\logs mkdir ..\logs
 :: Run log with timestamp (overwrites previous log on startup)
 echo [STARTUP] Backend starting at %DATE% %TIME% > ..\logs\backend.log
 
+:: Clear activity and API usage logs for fresh session
+echo. > ..\logs\activity.log
+echo. > ..\logs\api_usage.log
+
 :: Force UTF-8 encoding to prevent crash on printing Emojis
 set PYTHONIOENCODING=utf-8
 

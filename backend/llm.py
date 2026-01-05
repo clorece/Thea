@@ -8,22 +8,64 @@ import datetime
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
+# Session-level API usage tracking
+_api_session_stats = {
+    "session_start": None,
+    "total_calls": 0,
+    "calls_by_endpoint": {},
+}
+
 def log_api_usage(endpoint, status="Success", details=""):
     """
     Logs API usage to logs/api_usage.log for tracking rate limits.
+    Also maintains session-level statistics.
     """
+    global _api_session_stats
+    
     try:
         log_dir = os.path.join(os.path.dirname(__file__), "..", "logs")
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-            
+        
+        # Initialize session start time
+        if _api_session_stats["session_start"] is None:
+            _api_session_stats["session_start"] = datetime.datetime.now()
+        
+        # Update counters
+        _api_session_stats["total_calls"] += 1
+        if endpoint not in _api_session_stats["calls_by_endpoint"]:
+            _api_session_stats["calls_by_endpoint"][endpoint] = 0
+        _api_session_stats["calls_by_endpoint"][endpoint] += 1
+        
+        # Calculate session duration
+        session_duration = datetime.datetime.now() - _api_session_stats["session_start"]
+        session_mins = int(session_duration.total_seconds() / 60)
+        
         log_path = os.path.join(log_dir, "api_usage.log")
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
+        # Format call counts
+        call_count = _api_session_stats["calls_by_endpoint"][endpoint]
+        total = _api_session_stats["total_calls"]
+        
         with open(log_path, "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] Endpoint: {endpoint} | Status: {status} | {details}\n")
+            f.write(f"[{timestamp}] #{total} | {endpoint} ({call_count}x) | {status} | {details}\n")
+            
     except Exception as e:
         print(f"Failed to log API usage: {e}")
+
+def get_api_session_stats():
+    """Returns current session API usage statistics."""
+    if _api_session_stats["session_start"]:
+        duration = datetime.datetime.now() - _api_session_stats["session_start"]
+        mins = int(duration.total_seconds() / 60)
+    else:
+        mins = 0
+    return {
+        "session_minutes": mins,
+        "total_calls": _api_session_stats["total_calls"],
+        "by_endpoint": _api_session_stats["calls_by_endpoint"].copy()
+    }
 
 if not API_KEY:
     # Try reading from file (Dev first, then User)
@@ -505,6 +547,8 @@ Respond ONLY with valid JSON in this exact format:
             
             try:
                 data = json.loads(text)
+                details = "Visual + Audio" if audio_bytes else "Visual Only"
+                log_api_usage("analyze_for_learning", "Success", details)
                 return {
                     "is_new_context": data.get("is_new", False),
                     "learning": data.get("learning"),
@@ -512,8 +556,6 @@ Respond ONLY with valid JSON in this exact format:
                     "recommendation": data.get("recommendation"),
                     "confidence": float(data.get("confidence", 0.5))
                 }
-                details = "Visual + Audio" if audio_bytes else "Visual Only"
-                log_api_usage("analyze_for_learning", "Success", details)
             except json.JSONDecodeError:
                 print(f"[Learning] Failed to parse Gemini response: {text[:100]}")
                 return {
