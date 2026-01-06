@@ -72,7 +72,7 @@ class ObservationBuffer:
     def __init__(self, max_size: int = 10):
         self.buffer: deque[Observation] = deque(maxlen=max_size)
         self.context_hashes: set = set()  # For deduplication
-        self._recent_hash_ttl = 300  # 5 minutes
+        self._recent_hash_ttl = 30  # 30 seconds - allow re-observation of same context
         self._hash_timestamps: Dict[str, float] = {}
     
     def add(self, obs: Observation) -> bool:

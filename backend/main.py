@@ -206,8 +206,13 @@ async def process_significant_observation(obs):
             reason = "User is idle, saving for later"
         elif not can_speak:
             reason = "Cooldown active"
-        elif user_is_focused and obs.significance_score < 0.6:
-            reason = f"User focused, score {obs.significance_score:.2f} too low"
+        elif user_is_focused and obs.significance_score < 0.5:
+            # 50% chance to still speak during focus (reduced frequency, not silence)
+            import random
+            if random.random() < 0.5:
+                should_speak = True  # Random override - still engage sometimes
+            else:
+                reason = f"User focused, score {obs.significance_score:.2f} (learning quietly)"
         else:
             # Rin decides to speak!
             should_speak = True
@@ -227,7 +232,7 @@ async def process_significant_observation(obs):
                 meta={"role": "model", "is_recommendation": True}
             )
             
-            log_activity("RECOMMENDATION", f"[RIN SPEAKS] {rec_content}")
+            log_activity("REACTION", f"[RIN SPEAKS] {rec_content}")
             print(f"[Thinking] Rin decides to speak: {rec_content}")
         else:
             # Save for "what are you thinking?"
@@ -236,6 +241,14 @@ async def process_significant_observation(obs):
                 reason=reason,
                 context=obs.window_title
             )
+            
+            # Also queue as a thought for notification overlay (but not chat box)
+            reaction_queue.append({
+                "type": "thought",
+                "content": "💭",
+                "description": f"{rec_content[:80]}..."
+            })
+            
             log_activity("THINKING", f"[SAVED] ({reason}) {rec_content[:50]}...")
             
     except Exception as e:

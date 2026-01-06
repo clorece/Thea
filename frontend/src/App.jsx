@@ -105,8 +105,8 @@ function App() {
         const poll = async () => {
             const update = await getUpdates();
             if (update && (update.type === 'reaction' || update.type === 'proactive' || update.type === 'chat' || update.type === 'recommendation')) {
-                // Show recommendations in chat box
-                if (update.type === 'chat' || update.type === 'recommendation') {
+                // Only show chat messages in chat box (reactions/thoughts go to notification overlay)
+                if (update.type === 'chat') {
                     setExternalChatMessage(update.description);
                 }
 
@@ -250,14 +250,14 @@ function App() {
                             borderRadius: '50%',
                             objectFit: 'cover',
                             border: `3px solid ${thinkingState === 'deep' ? '#60a5fa' :
-                                    thinkingState === 'thinking' ? '#fbbf24' :
-                                        thinkingState === 'resting' ? 'rgba(255,255,255,0.3)' :
-                                            '#4ade80'
+                                thinkingState === 'thinking' ? '#fbbf24' :
+                                    thinkingState === 'resting' ? 'rgba(255,255,255,0.3)' :
+                                        '#4ade80'
                                 }`,
                             boxShadow: `0 0 ${thinkingState === 'deep' ? '15px' : '12px'} ${thinkingState === 'deep' ? 'rgba(96, 165, 250, 0.5)' :
-                                    thinkingState === 'thinking' ? 'rgba(251, 191, 36, 0.4)' :
-                                        thinkingState === 'resting' ? 'rgba(255,255,255,0.1)' :
-                                            'rgba(74, 222, 128, 0.3)'
+                                thinkingState === 'thinking' ? 'rgba(251, 191, 36, 0.4)' :
+                                    thinkingState === 'resting' ? 'rgba(255,255,255,0.1)' :
+                                        'rgba(74, 222, 128, 0.3)'
                                 }`,
                             transition: 'all 0.5s ease'
                         }}
