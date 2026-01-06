@@ -603,8 +603,8 @@ async def process_observation(window_title, image_b64, trigger_type=None):
             window_title=window_title or "",
             app_name=app_name or "",
             features=features,
-            image_bytes=image_bytes if gate_result.should_call_gemini else None,
-            audio_bytes=audio_bytes if gate_result.should_call_gemini else None
+            image_bytes=image_bytes,
+            audio_bytes=audio_bytes
         )
         
         if closed_episode:
