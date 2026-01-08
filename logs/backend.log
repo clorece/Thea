@@ -1,0 +1,613 @@
+[STARTUP] Backend starting at Wed 01/07/2026 19:23:00.31 
+INFO:     Will watch for changes in these directories: ['D:\\Projects\\Rin\\backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [27600] using WatchFiles
+INFO:     Started server process [16536]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+[OllamaMind] Chat: gemma3:4b, Vision: llama3.2-vision:latest
+[OllamaMind] GPU: num_gpu=-1, CPU: num_thread=4
+[OllamaMind] Memory: keep_alive=0 (unload after use)
+[Ears] System default speaker: Speakers (Realtek(R) Audio)
+[Ears] Using: Speakers (Realtek(R) Audio) (system default)
+[Startup] Cleared api_usage.log
+[Startup] Failed to clear backend.log: [Errno 13] Permission denied: 'D:\\Projects\\Rin\\backend\\..\\logs\\backend.log'
+[Startup] Cleared activity.log
+[Startup] Cleared system_changes.log
+[Startup] Cleared api_usage.log and error.log
+[Startup] Starting activity collector...
+[ActivityCollector] Watching: C:\Users\clare
+[AppTracker] Started
+[ActivityCollector] Started
+[Startup] Starting ears (audio capture)...
+[Ears] Started listening...
+[Startup] Thinking system enabled
+[Thinking] Background thinking loop started
+[Ears] Recording at 44100Hz from Speakers (Realtek(R) Audio)
+[FileTracker] deleted: 21956
+[FileTracker] deleted: 925a1555-faf3-48dc-85e6-cce0fe856041.pb
+[FileTracker] moved_to: 925a1555-faf3-48dc-85e6-cce0fe856041.pb
+[FileTracker] deleted: c67e674f-c126-485d-8c46-3a08f8e4b619.pb
+[FileTracker] moved_to: c67e674f-c126-485d-8c46-3a08f8e4b619.pb
+[FileTracker] modified: LOG
+[FileTracker] moved_from: LOG.old
+[FileTracker] modified: data_0
+[FileTracker] moved_from: LOG
+[FileTracker] moved_to: LOG.old
+[FileTracker] modified: data_1
+[FileTracker] modified: data_2
+[FileTracker] modified: LOG.old
+[FileTracker] modified: data_3
+[FileTracker] modified: f_000005
+[FileTracker] created: LOG
+[FileTracker] modified: f_000006
+[FileTracker] modified: f_000007
+[FileTracker] modified: f_000008
+[FileTracker] modified: f_000009
+[FileTracker] modified: f_00000a
+[FileTracker] modified: f_000011
+[FileTracker] modified: f_000012
+[FileTracker] modified: f_000014
+[FileTracker] modified: f_000016
+[FileTracker] modified: f_000017
+[FileTracker] modified: f_000018
+[FileTracker] modified: f_0000a8
+[FileTracker] modified: f_000139
+[FileTracker] modified: f_0001e2
+[FileTracker] modified: f_00025b
+[FileTracker] modified: f_00026a
+[FileTracker] modified: f_000391
+[AppTracker] zen.exe focused for 2s (entertainment)
+[FileTracker] modified: f_0003a9
+[FileTracker] modified: f_0003b8
+[FileTracker] modified: f_0003f2
+[FileTracker] modified: f_0004c9
+[FileTracker] modified: f_0004f9
+[FileTracker] modified: f_0005e8
+[FileTracker] modified: f_000661
+[FileTracker] modified: f_0006cf
+[FileTracker] modified: f_000774
+[FileTracker] modified: f_000942
+[FileTracker] modified: f_000979
+[FileTracker] modified: f_000a6b
+[FileTracker] modified: f_000af8
+[FileTracker] modified: f_000af9
+[FileTracker] modified: f_000afa
+[FileTracker] modified: f_000afc
+[FileTracker] modified: f_000b09
+[FileTracker] modified: f_000b90
+[FileTracker] modified: f_000c16
+[FileTracker] modified: f_000cfd
+[FileTracker] modified: f_000dbc
+[FileTracker] modified: f_000fe3
+[FileTracker] modified: f_000fe5
+[FileTracker] modified: f_000fe7
+[FileTracker] modified: f_001146
+[FileTracker] modified: f_001147
+[FileTracker] modified: f_00114c
+[FileTracker] modified: f_00119d
+[FileTracker] modified: f_00119f
+[FileTracker] modified: f_0011a1
+[FileTracker] modified: f_0011ab
+[FileTracker] modified: f_0011e3
+[FileTracker] modified: f_0011e5
+[FileTracker] modified: f_0011ee
+[FileTracker] modified: f_001657
+[FileTracker] modified: f_0016c5
+[FileTracker] modified: f_0016c9
+[FileTracker] modified: f_001701
+[FileTracker] modified: f_001731
+[FileTracker] modified: f_001782
+[FileTracker] modified: f_001783
+[FileTracker] modified: f_001784
+[FileTracker] modified: f_001785
+[FileTracker] modified: f_001786
+[FileTracker] modified: f_001787
+[FileTracker] modified: f_00179b
+[FileTracker] modified: f_00179c
+[FileTracker] modified: f_00179d
+[FileTracker] modified: f_00179e
+[FileTracker] modified: f_00179f
+[FileTracker] modified: f_0017a0
+[FileTracker] modified: f_001c49
+[FileTracker] modified: f_001c4a
+[FileTracker] modified: f_001c4c
+[FileTracker] modified: f_001c4e
+[FileTracker] modified: f_001c4f
+[FileTracker] modified: f_001c50
+[FileTracker] modified: f_002892
+[FileTracker] modified: f_002ac3
+[FileTracker] modified: f_002ac4
+[FileTracker] modified: f_002ace
+[FileTracker] modified: f_002b62
+[FileTracker] modified: f_002c8a
+[FileTracker] modified: f_002c8b
+[FileTracker] modified: f_002c8c
+[FileTracker] modified: f_002c8d
+[FileTracker] modified: f_002c8e
+[FileTracker] modified: f_002c8f
+[FileTracker] modified: f_003125
+[FileTracker] modified: f_003127
+[FileTracker] modified: f_003128
+[FileTracker] modified: f_00312b
+[FileTracker] modified: f_00312c
+[FileTracker] modified: f_00312d
+[FileTracker] modified: f_0031bd
+[FileTracker] modified: f_0031be
+[FileTracker] modified: f_0031bf
+[FileTracker] modified: f_0031c0
+[FileTracker] modified: f_0031c1
+[FileTracker] modified: f_0031c2
+[FileTracker] modified: f_0035c3
+[FileTracker] modified: f_0035c6
+[FileTracker] modified: f_0035c7
+[FileTracker] modified: f_0035c8
+[FileTracker] modified: f_0035ca
+[FileTracker] modified: f_0035cb
+[FileTracker] modified: f_0035cc
+[FileTracker] modified: f_0045ef
+[FileTracker] modified: f_004605
+[FileTracker] modified: f_004805
+[FileTracker] modified: f_004806
+[FileTracker] modified: f_004c1d
+[FileTracker] modified: f_004c1e
+[FileTracker] modified: f_004c1f
+[FileTracker] modified: f_004c20
+[FileTracker] modified: f_004c21
+[FileTracker] modified: f_004c22
+[FileTracker] modified: f_004d5a
+[FileTracker] modified: f_004d5c
+[FileTracker] modified: f_004d5d
+[FileTracker] modified: f_004d60
+[FileTracker] modified: f_004d61
+[FileTracker] modified: f_004d62
+[FileTracker] modified: f_004e3d
+[FileTracker] modified: f_004e42
+[FileTracker] modified: f_004e43
+[FileTracker] modified: f_004e44
+[FileTracker] modified: f_004e45
+[FileTracker] modified: f_004e46
+[FileTracker] modified: f_004e47
+INFO:     127.0.0.1:61973 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /thinking/status HTTP/1.1" 200 OK
+[FileTracker] modified: f_004e5a
+[FileTracker] modified: f_004e5c
+INFO:     127.0.0.1:61973 - "GET /ears/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /knowledge/proactive HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /ears/status HTTP/1.1" 200 OK
+[FileTracker] modified: f_004e5d
+[FileTracker] modified: f_004e60
+[FileTracker] modified: f_004e61
+[FileTracker] modified: f_004e62
+[FileTracker] modified: f_006cf9
+[FileTracker] modified: f_006cfa
+[FileTracker] modified: f_006cfb
+[FileTracker] modified: f_006d1a
+[FileTracker] modified: f_00961c
+[FileTracker] modified: f_009887
+[FileTracker] modified: f_00cc12
+[FileTracker] modified: f_00cc15
+[FileTracker] modified: f_00cc16
+[FileTracker] modified: f_00cc18
+[FileTracker] modified: f_00cc19
+[FileTracker] modified: f_00cc1a
+[FileTracker] modified: f_00cc1b
+[FileTracker] modified: f_00cc58
+[FileTracker] modified: f_00cc59
+[FileTracker] modified: f_00cc5b
+[FileTracker] modified: f_00cc5d
+[FileTracker] modified: f_00cc5e
+[FileTracker] modified: f_00cc5f
+[FileTracker] modified: f_00cc83
+[FileTracker] modified: f_00cc84
+[FileTracker] modified: f_00cc85
+[FileTracker] modified: f_00cc86
+[FileTracker] modified: f_00cc87
+[FileTracker] modified: f_00cc88
+[FileTracker] modified: f_00ccb0
+[FileTracker] modified: f_00ccb1
+[FileTracker] modified: f_00ccb3
+[FileTracker] modified: f_00ccb5
+[FileTracker] modified: f_00ccb6
+[FileTracker] modified: f_00ccb7
+[FileTracker] modified: f_00ce9a
+[FileTracker] modified: f_00ce9c
+[FileTracker] modified: f_00ce9e
+[FileTracker] modified: f_00ce9f
+[FileTracker] modified: f_00cea0
+[FileTracker] modified: f_00cea1
+[FileTracker] modified: f_00ceb2
+[FileTracker] modified: f_00ceb3
+[FileTracker] modified: f_00ceb4
+[FileTracker] modified: f_00ceb5
+[FileTracker] modified: f_00ceb6
+[FileTracker] modified: f_00ceb7
+[FileTracker] modified: f_00d051
+[FileTracker] modified: f_00d052
+[FileTracker] modified: f_00d053
+[FileTracker] modified: f_00d6d7
+[FileTracker] modified: f_00d779
+[FileTracker] modified: index
+[FileTracker] modified: index
+[FileTracker] modified: the-real-index
+[FileTracker] modified: db
+[FileTracker] modified: Cookies
+[FileTracker] modified: Network Persistent State
+[FileTracker] modified: NetworkDataMigrated
+[FileTracker] modified: Trust Tokens
+[FileTracker] deleted: 7ae3e2ea-5ede-4888-a16b-94d049a85485
+[FileTracker] modified: default.exc
+[FileTracker] modified: default.acl
+[FileTracker] modified: gmdb.blb
+[FileTracker] modified: LOG
+[FileTracker] moved_from: LOG.old
+[FileTracker] moved_from: LOG
+[FileTracker] moved_to: LOG.old
+[FileTracker] modified: LOG.old
+[FileTracker] created: LOG
+[FileTracker] created: 09F74072D3B2BD24EA1008773AE077AE14BE93F0
+[FileTracker] modified: 09F74072D3B2BD24EA1008773AE077AE14BE93F0
+[FileTracker] created: 4D0E0CF8A211D343BA0BB5D7FB0DFF97877C9BEF
+[FileTracker] modified: 4D0E0CF8A211D343BA0BB5D7FB0DFF97877C9BEF
+[FileTracker] created: 6E904BFC076F318868204CF93E9960007BC4EB4F
+[FileTracker] modified: 6E904BFC076F318868204CF93E9960007BC4EB4F
+[FileTracker] deleted: 046a721bcfe4f22c_0
+[FileTracker] deleted: 250239f983153e2f_0
+[FileTracker] deleted: f_00d6d7
+[FileTracker] deleted: 0b885c280605fe79_0
+[FileTracker] created: f_00d77a
+[FileTracker] modified: f_00d77a
+[FileTracker] deleted: 9c718ea151d6341a_0
+[FileTracker] deleted: 162c549d0e4e57ca_0
+[FileTracker] created: 046a721bcfe4f22c_0
+[FileTracker] created: 0b885c280605fe79_0
+[FileTracker] modified: 046a721bcfe4f22c_0
+[FileTracker] created: 162c549d0e4e57ca_0
+[FileTracker] modified: 0b885c280605fe79_0
+[FileTracker] modified: 162c549d0e4e57ca_0
+[FileTracker] deleted: ad74f4186c2e8eb0_0
+[FileTracker] deleted: 997e879d17157b8a_0
+[FileTracker] deleted: d76ffa4fa5ca4bdc_0
+[FileTracker] deleted: 406fc72d6015ea9d_0
+[FileTracker] created: 250239f983153e2f_0
+[FileTracker] created: ad74f4186c2e8eb0_0
+[FileTracker] created: 997e879d17157b8a_0
+[FileTracker] modified: 250239f983153e2f_0
+[FileTracker] created: 406fc72d6015ea9d_0
+[FileTracker] modified: ad74f4186c2e8eb0_0
+[FileTracker] created: 9c718ea151d6341a_0
+[FileTracker] modified: 997e879d17157b8a_0
+[FileTracker] created: d76ffa4fa5ca4bdc_0
+[FileTracker] modified: 406fc72d6015ea9d_0
+[FileTracker] modified: 9c718ea151d6341a_0
+[FileTracker] modified: d76ffa4fa5ca4bdc_0
+[FileTracker] modified: 47E4DE45A5F3584FF4BE49BD08BA3369C6BE0CF8
+[FileTracker] created: 32138D1A6878C63EC59BB5B66DD2B0F5B9879395
+[FileTracker] modified: 32138D1A6878C63EC59BB5B66DD2B0F5B9879395
+[FileTracker] created: 36D5400B9404526321BE3286F99DE421A4963AF9
+[FileTracker] modified: 36D5400B9404526321BE3286F99DE421A4963AF9
+[FileTracker] created: BCDBDC3655AD80F84C5883B79EB66C60CC8F623A
+[FileTracker] modified: BCDBDC3655AD80F84C5883B79EB66C60CC8F623A
+[Trigger] Title changed: '' -> 'Rin'
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d779
+[FileTracker] created: f_00d77b
+[FileTracker] modified: f_00d77b
+[Fog] Started episode ep_1_1767831785: electron.exe
+[System Change] [KNOWLEDGE] user_fact_learned: [app_usage] other: electron.exe (conf: 0.30)
+[Knowledge] Rule-based learning extracted
+[Thinking] Observation buffered (buffer size: 1)
+Analysis: {'reaction': '', 'description': '[Local] Recognized: electron.exe'}
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d77b
+[FileTracker] created: f_00d77c
+[FileTracker] modified: f_00d77c
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d77c
+[FileTracker] created: f_00d77d
+[FileTracker] modified: f_00d77d
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d77d
+[FileTracker] created: f_00d77e
+[FileTracker] modified: f_00d77e
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /ears/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d77e
+[FileTracker] created: f_00d77f
+[FileTracker] modified: f_00d77f
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d77f
+[FileTracker] created: f_00d780
+[FileTracker] modified: f_00d780
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d780
+[FileTracker] created: f_00d781
+[FileTracker] modified: f_00d781
+[Thinking] State: active → thinking
+[System Change] [THINKING_STATE] changed: active -> thinking
+[Thinking] Cycle #1: 1 buffered, 1 significant
+[FileTracker] modified: gmdb.blb
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d781
+[FileTracker] created: f_00d782
+[FileTracker] modified: f_00d782
+INFO:     127.0.0.1:61973 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d782
+[FileTracker] created: f_00d783
+[FileTracker] modified: f_00d783
+[FileTracker] moved_from: Preferences
+[FileTracker] moved_to: Preferences
+[FileTracker] modified: Preferences
+INFO:     127.0.0.1:61973 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /ears/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d783
+[FileTracker] created: f_00d784
+[FileTracker] modified: f_00d784
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d784
+[FileTracker] created: f_00d785
+[FileTracker] modified: f_00d785
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d785
+[FileTracker] created: f_00d786
+[FileTracker] modified: f_00d786
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d786
+[FileTracker] created: f_00d787
+[FileTracker] modified: f_00d787
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d787
+[FileTracker] created: f_00d788
+[FileTracker] modified: f_00d788
+[FileTracker] modified: RGStats.db
+INFO:     127.0.0.1:61973 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /ears/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d788
+[FileTracker] created: f_00d789
+[FileTracker] modified: f_00d789
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d789
+[FileTracker] created: f_00d78a
+[FileTracker] modified: f_00d78a
+[Learning] Vision description: The image shows a screenshot of the YouTube homepage, with a video playing in the center and various...
+[FileTracker] modified: QuotaManager
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d78a
+[FileTracker] modified: gmdb.blb
+[FileTracker] created: f_00d78b
+[FileTracker] modified: f_00d78b
+INFO:     127.0.0.1:61974 - "OPTIONS /chat HTTP/1.1" 200 OK
+[System Change] [MEMORY] added: [chat] User: can you read me one of the titles of the vid...
+[Chat] Including screen capture (937166 bytes)
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d78b
+[FileTracker] created: f_00d78c
+[FileTracker] modified: f_00d78c
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d78c
+[FileTracker] created: f_00d78d
+[FileTracker] modified: f_00d78d
+[FileTracker] modified: gmdb.blb
+[FileTracker] modified: settings.dat.LOG2
+[FileTracker] modified: settings.dat.LOG2
+[System Change] [KNOWLEDGE] user_fact_learned: [interest] The user is exploring YouTube : The user is exploring YouTube and familiar with its core features like video playback, video browsing, and navigation through the homepage. (conf: 0.85)
+[Knowledge] Gemini learned: The user is exploring YouTube and familiar with its core features like video playback, video browsing, and navigation through the homepage.
+[Knowledge] Gemini recommendation: Consider exploring YouTube's recommendation algorithm based on your viewing history.
+[System Change] [MEMORY] added: [chat] Consider exploring YouTube's recommendation algori...
+[Thinking] Rin decides to speak: Consider exploring YouTube's recommendation algorithm based on your viewing history.
+[FileTracker] created: temp-index
+[FileTracker] modified: temp-index
+[FileTracker] moved_from: the-real-index
+[FileTracker] moved_from: temp-index
+[FileTracker] moved_to: the-real-index
+[FileTracker] modified: the-real-index
+INFO:     127.0.0.1:61974 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62016 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /ears/status HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d78d
+[FileTracker] created: f_00d78e
+[FileTracker] modified: f_00d78e
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+[FileTracker] modified: gmdb.blb
+INFO:     127.0.0.1:62016 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d78e
+[FileTracker] created: f_00d78f
+[FileTracker] modified: f_00d78f
+INFO:     127.0.0.1:62016 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d78f
+[FileTracker] created: f_00d790
+[FileTracker] modified: f_00d790
+INFO:     127.0.0.1:62016 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d790
+[FileTracker] created: f_00d791
+[FileTracker] modified: f_00d791
+INFO:     127.0.0.1:62016 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d791
+[FileTracker] created: f_00d792
+[FileTracker] modified: f_00d792
+[Thinking] State: thinking → active
+[System Change] [THINKING_STATE] changed: thinking -> active
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62016 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62029 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62029 - "GET /ears/status HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d792
+[FileTracker] created: f_00d793
+[FileTracker] modified: f_00d793
+INFO:     127.0.0.1:62029 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d793
+[FileTracker] created: f_00d794
+[FileTracker] modified: f_00d794
+INFO:     127.0.0.1:62029 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d794
+[FileTracker] created: f_00d795
+[FileTracker] modified: f_00d795
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62029 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d795
+[FileTracker] created: f_00d796
+[FileTracker] modified: f_00d796
+[Chat] Vision saw: The image shows a screenshot of the YouTube homepage, with a list of videos and their titles, thumbnails, and descriptions. The purpose of the image i...
+INFO:     127.0.0.1:61974 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62029 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d796
+[FileTracker] created: f_00d797
+[FileTracker] modified: f_00d797
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD_1.parc
+[FileTracker] modified: gmdb.blb
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+INFO:     127.0.0.1:62016 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62029 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62051 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /knowledge/proactive HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62051 - "GET /ears/status HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d797
+[FileTracker] created: f_00d798
+[FileTracker] modified: f_00d798
+[Trigger] Force update (30s timeout)
+INFO:     127.0.0.1:62051 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d798
+[FileTracker] created: f_00d799
+[FileTracker] modified: f_00d799
+[System Change] [KNOWLEDGE] user_fact_learned: [app_usage] other: electron.exe (conf: 0.30)
+[Knowledge] Rule-based learning extracted
+[Thinking] Observation buffered (buffer size: 1)
+Analysis: {'reaction': '', 'description': '[Local] Recognized: electron.exe'}
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[System Change] [MEMORY] added: [chat] Rin: Okay, let’s see! One of the video titles on t...
+INFO:     127.0.0.1:61973 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d799
+[FileTracker] created: f_00d79a
+[FileTracker] modified: f_00d79a
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+[FileTracker] modified: gmdb.blb
+INFO:     127.0.0.1:61973 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d79a
+[FileTracker] created: f_00d79b
+[FileTracker] modified: f_00d79b
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d79b
+[FileTracker] created: f_00d79c
+[FileTracker] modified: f_00d79c
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[Thinking] State: active → thinking
+[System Change] [THINKING_STATE] changed: active -> thinking
+[Thinking] Cycle #3: 1 buffered, 1 significant
+INFO:     127.0.0.1:62010 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /ears/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d79c
+[FileTracker] created: f_00d79d
+[FileTracker] modified: f_00d79d
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] modified: gmdb.blb
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+INFO:     127.0.0.1:61973 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d79d
+[FileTracker] created: f_00d79e
+[FileTracker] modified: f_00d79e
+INFO:     127.0.0.1:62010 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d79e
+[FileTracker] created: f_00d79f
+[FileTracker] modified: f_00d79f
+INFO:     127.0.0.1:62010 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d79f
+[FileTracker] created: f_00d7a0
+[FileTracker] modified: f_00d7a0
+INFO:     127.0.0.1:62010 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a0
+[FileTracker] created: f_00d7a1
+[FileTracker] modified: f_00d7a1
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62010 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62071 - "GET /ears/status HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a1
+[FileTracker] created: f_00d7a2
+[FileTracker] modified: f_00d7a2
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a2
+[FileTracker] created: f_00d7a3
+[FileTracker] modified: f_00d7a3
+INFO:     127.0.0.1:62072 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62071 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a3
+[FileTracker] created: f_00d7a4
+[FileTracker] modified: f_00d7a4
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a4
+[FileTracker] created: f_00d7a5
+[FileTracker] modified: f_00d7a5
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a5
+[FileTracker] created: f_00d7a6
+[FileTracker] modified: f_00d7a6
+[Learning] Vision description: The image shows a screenshot of the YouTube homepage, with a search bar at the top and a list of vid...
+INFO:     127.0.0.1:62072 - "GET /thinking/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62071 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62071 - "GET /ears/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a6
+[FileTracker] created: f_00d7a7
+[FileTracker] modified: f_00d7a7
+[FileTracker] modified: C5737EDD03E5DB6B57A45072439E2CFD.parc
+[FileTracker] modified: gmdb.blb
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK
+[FileTracker] deleted: f_00d7a7
+[FileTracker] created: f_00d7a8
+[FileTracker] modified: f_00d7a8
+INFO:     127.0.0.1:62071 - "GET /capture?analyze=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62072 - "GET /updates HTTP/1.1" 200 OK

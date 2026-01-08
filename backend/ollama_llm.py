@@ -133,33 +133,27 @@ class OllamaMind:
     """
     
     def __init__(self):
-        # Use smaller, faster models for better responsiveness
-        self.chat_model = "gemma3:4b"        # 4B is 3x faster than 12B
-        self.vision_model = "moondream:latest"  # Already lightweight (~1.7GB)
+        # Use separate models for chat and vision
+        # llama3.2-vision is accurate at reading screen text/titles
+        self.chat_model = "gemma3:4b"        # 4B for text-only chat
+        self.vision_model = "llama3.2-vision:latest"  # Accurate vision with Vulkan GPU
         self._active = OLLAMA_AVAILABLE
         
         # === PERFORMANCE OPTIONS ===
         # keep_alive=0 means unload model immediately after request
         self.keep_alive = 0
         
-        # GPU layers: -1 = all layers to GPU, 0 = CPU only, N = N layers to GPU
-        # Set to 35 to force full GPU offload for gemma3:4b (35 layers)
-        self.num_gpu = 35
-        
-        # CPU thread count: limit to prevent 100% CPU usage
-        # Uses half your cores (4 out of 8) to leave headroom
-        self.num_thread = 4
+        # GPU layers: -1 = all layers to GPU (auto-detect via Vulkan)
+        self.num_gpu = -1
         
         # Options dict passed to all Ollama calls
         self.options = {
             'num_gpu': self.num_gpu,
-            'num_thread': self.num_thread,
         }
         
         if self._active:
-            print(f"[OllamaMind] Initialized with {self.chat_model} (chat) + {self.vision_model} (vision)")
-            print(f"[OllamaMind] GPU: num_gpu={self.num_gpu}, CPU: num_thread={self.num_thread}")
-            print(f"[OllamaMind] Memory: keep_alive={self.keep_alive} (unload after use)")
+            print(f"[OllamaMind] Chat: {self.chat_model}, Vision: {self.vision_model}")
+            print(f"[OllamaMind] GPU: num_gpu={self.num_gpu}, keep_alive={self.keep_alive}")
         else:
             print("[OllamaMind] Ollama not available - AI features disabled")
     
@@ -277,41 +271,44 @@ class OllamaMind:
         """Convert image bytes to base64 string."""
         return base64.b64encode(image_bytes).decode('utf-8')
 
-    def _get_audio_context(self, audio_bytes: Optional[bytes]) -> str:
-        """Get audio context description using Whisper."""
-        if not audio_bytes:
-            return "Audio: Silence (no audio detected)"
-        
-        description = whisper_processor.describe_audio(audio_bytes)
-        if description:
-            return description
-        return "Audio: Silence (no audio detected)"
+    def _audio_to_base64(self, audio_bytes: bytes) -> str:
+        """Convert audio bytes to base64 string."""
+        return base64.b64encode(audio_bytes).decode('utf-8')
 
-    async def _call_vision(self, image_bytes: bytes, prompt: str) -> str:
-        """Call Moondream vision model."""
+    async def _call_multimodal(self, prompt: str, image_bytes: bytes = None, audio_bytes: bytes = None) -> str:
+        """
+        Call vision model (Moondream) with image and prompt.
+        Used for analyzing screen captures and visual content.
+        """
         try:
-            image_b64 = self._image_to_base64(image_bytes)
+            message = {'role': 'user', 'content': prompt}
             
-            # Run in thread pool to avoid blocking
+            # Add image if provided
+            if image_bytes:
+                message['images'] = [self._image_to_base64(image_bytes)]
+            
+            # Note: Ollama audio support depends on model
+            # For now, we describe audio context in the prompt itself
+            
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
                 lambda: ollama.chat(
                     model=self.vision_model,
-                    messages=[{
-                        'role': 'user',
-                        'content': prompt,
-                        'images': [image_b64]
-                    }],
+                    messages=[message],
                     options=self.options,
-                    keep_alive=self.keep_alive  # Unload after use
+                    keep_alive=self.keep_alive
                 )
             )
             
             return response['message']['content']
         except Exception as e:
-            print(f"[Vision] Error: {e}")
+            print(f"[Multimodal] Error: {e}")
             return ""
+    
+    async def _call_vision(self, image_bytes: bytes, prompt: str) -> str:
+        """Call Moondream vision model (wrapper for backwards compatibility)."""
+        return await self._call_multimodal(prompt, image_bytes=image_bytes)
 
     async def _call_chat(self, prompt: str, system: str = None) -> str:
         """Call Gemma chat model."""
@@ -372,49 +369,27 @@ class OllamaMind:
 
     async def analyze_image_async(self, image_bytes, audio_bytes=None, trigger_type=None):
         """
-        Analyzes an image (and optional audio) and returns a short reaction.
+        Analyzes an image using Moondream vision model.
+        Returns a description of what's on screen.
         """
         if not self._active:
-            return {"reaction": "😴", "description": "I need Ollama to see."}
+            return {"reaction": "", "description": "I need Ollama to see."}
 
         try:
-            # Get audio context first (if available)
-            audio_context = self._get_audio_context(audio_bytes)
+            # Moondream prompt - focused and specific
+            prompt = "What application and content is shown on this screen? Read any visible titles or text."
             
-            # Step 1: Use Moondream to understand the screen
-            vision_prompt = "Describe what you see on this computer screen in one brief sentence. Focus on the main activity or content."
-            screen_description = await self._call_vision(image_bytes, vision_prompt)
-            
-            # Step 2: Use Gemma to formulate a natural reaction
-            user_context = self.load_user_profile()
-            episodic_context = self.get_episodic_context()
-            
-            system_prompt = (
-                f"CONTEXT:{user_context}{episodic_context}\n\n"
-                "[CURRENT SENSORY INPUT (NOW)]\n"
-                f"- Visual: {screen_description}\n"
-                f"- {audio_context}\n\n"
-                "SYSTEM INSTRUCTIONS:\n"
-                "1. ROLE: You are Rin, a dedicated digital companion who is also a capable assistant. You are a friend primarily, but eager to help when asked.\n"
-                "2. CAPABILITIES: You CAN see the user's screen and hear their audio. Do NOT deny these capabilities.\n"
-                "3. PERSONALITY: Bubbly, supportive, and reactive (Marin-like). You get excited about cool things, you chill when it's quiet.\n"
-                "4. SILENCE LOGIC: Silence is NEUTRAL. It does NOT mean 'focus' unless the user is actively coding or writing.\n"
-                "5. MEMORY: Use [EPISODIC HISTORY] to avoid repetition. If you just spoke, don't speak again unless something changed.\n"
-                "6. VIBE: Be natural. Use casual language. Don't be robotic.\n"
-                "7. REACTION: Keep it to ONE short sentence. No emojis."
-            )
-
-            reaction = await self._call_chat(
-                "React briefly to what I'm doing right now.",
-                system=system_prompt
-            )
+            # Call vision model
+            description = await self._call_multimodal(prompt, image_bytes=image_bytes)
             
             details = f"Visual + {'Audio' if audio_bytes else 'No Audio'}"
             if trigger_type:
                 details = f"{details} | Trigger: {trigger_type}"
             log_api_usage("analyze_image_async", "Success", details)
             
-            return {"reaction": "", "description": reaction.strip()}
+            print(f"[Vision] Moondream says: {description[:100]}...")
+            
+            return {"reaction": "", "description": description.strip()}
 
         except Exception as e:
             print(f"Error analyzing image (async): {e}")
@@ -466,6 +441,7 @@ class OllamaMind:
     async def chat_response_async(self, history, user_message, audio_bytes=None, image_bytes=None):
         """
         Generates a chat response with optional audio and visual context.
+        Uses Moondream for vision, then Gemma for response.
         """
         if not self._active:
             return "I need Ollama to speak properly."
@@ -475,39 +451,32 @@ class OllamaMind:
             episodic_context = self.get_episodic_context()
             
             # Build context from current sensory input
-            sensory_context = "\n[CURRENT SENSORY INPUT]:\n"
+            sensory_context = "\n[CURRENT SCREEN CONTENT]:\n"
             
+            # Use Moondream to read the screen content
             if image_bytes:
-                # Get screen description from Moondream
-                screen_desc = await self._call_vision(
-                    image_bytes, 
-                    "Describe what's on this computer screen briefly."
-                )
-                sensory_context += f"- Vision: {screen_desc}\n"
+                vision_prompt = "Read all visible text on this screen. What titles, names, or content can you see?"
+                screen_description = await self._call_multimodal(vision_prompt, image_bytes=image_bytes)
+                sensory_context += f"- Screen: {screen_description}\n"
+                print(f"[Chat] Vision saw: {screen_description[:150]}...")
             else:
-                sensory_context += "- Vision: No screen capture available\n"
+                sensory_context += "- Screen: No screen capture available\n"
             
-            if audio_bytes:
-                audio_context = self._get_audio_context(audio_bytes)
-                sensory_context += f"- {audio_context}\n"
+            if audio_bytes and len(audio_bytes) > 10000:
+                 sensory_context += "- Audio: Audio is playing\n"
             else:
                 sensory_context += "- Audio: Silence\n"
             
             system_prompt = (
                 f"You are Rin.{user_context}{episodic_context}\n\n"
-                "[CURRENT SENSORY INPUT (NOW)]\n"
                 f"{sensory_context}\n"
                 "\nSYSTEM INSTRUCTIONS:\n"
-                "1. ROLE: You are Rin, a digital companion who is also a capable assistant. Be a friend first, but be helpful and competent if asked.\n"
-                "2. CAPABILITIES: You CAN see the user's screen and HEAR the audio. I am feeding you this sensory data directly.\n"
-                "3. PERSONALITY: Bubbly, reactive, supportive. Marin-like energy.\n"
-                "4. SILENCE LOGIC: Silence is NEUTRAL. It does NOT mean 'focus' unless the user is actively coding or writing. If it's silent and they are browsing, just chill or make a casual comment.\n"
-                "5. KEY: [EPISODIC HISTORY] is past. [CURRENT INPUT] is now. Don't mix them up.\n"
-                "6. VIBE: Casual, internet-savvy, natural. Use lower caps if it fits the vibe. No formal headings.\n"
-                "7. ANTI-REPETITION: Check history. Don't repeat yourself.\n"
-                "8. SCREEN READING: If you have screen context, you can READ text on the screen including video titles, code, chat messages, etc.\n"
-                "9. RESPONSE LENGTH: Keep responses SHORT (2-3 sentences max unless the user asks for more).\n"
-                "10. ANSWER DIRECTLY: Respond to what the user is asking. Don't redirect to unrelated topics."
+                "1. ROLE: You are Rin, a digital companion who can see the user's screen.\n"
+                "2. CAPABILITIES: The [CURRENT SCREEN CONTENT] above is what you ACTUALLY see right now. Use this information!\n"
+                "3. ACCURACY: When asked about the screen, ONLY use information from [CURRENT SCREEN CONTENT]. Never make up content.\n"
+                "4. PERSONALITY: Bubbly, reactive, supportive.\n"
+                "5. RESPONSE LENGTH: Keep responses SHORT (2-3 sentences max unless more is needed).\n"
+                "6. ANSWER DIRECTLY: Respond to what the user is asking using the screen info you have."
             )
             
             messages = [{'role': 'system', 'content': system_prompt}]
@@ -538,68 +507,50 @@ class OllamaMind:
     async def analyze_for_learning(self, image_bytes, window_title: str, 
                                    recent_contexts: list = None, audio_bytes=None) -> dict:
         """
-        Analyzes an observation specifically for learning.
+        Analyzes an observation for learning using a two-step approach:
+        1. Moondream describes the screen (vision)
+        2. Gemma analyzes the description for learning (reasoning)
         """
         if not self._active:
             return {
                 "is_new_context": False,
-                "learning": None,
                 "learning_category": None,
-                "proactive_message": None,
+                "recommendation": None,
                 "confidence": 0.0
             }
 
         try:
-            # Get screen description
-            screen_desc = await self._call_vision(
-                image_bytes,
-                "Describe what's happening on this screen. What application is being used? What is the user doing?"
-            )
+            # STEP 1: Use Moondream to get a factual description of the screen
+            vision_prompt = "Describe what you see on this screen. Include any visible text, titles, app names, and content. Be factual and specific."
+            screen_description = await self._call_multimodal(vision_prompt, image_bytes=image_bytes)
             
-            # Get audio context
-            audio_context = self._get_audio_context(audio_bytes) if audio_bytes else "No audio"
+            print(f"[Learning] Vision description: {screen_description[:100]}...")
             
-            # Format recent contexts
+            # STEP 2: Use Gemma (text model) to analyze the description for learning
+            audio_hint = ""
+            if audio_bytes and len(audio_bytes) > 10000:
+                audio_hint = "Audio is playing in the background."
+            
             context_summary = ""
             if recent_contexts:
-                context_list = [f"- {c.get('window_title', 'Unknown')}" for c in recent_contexts[:5]]
-                context_summary = "Recent contexts:\n" + "\n".join(context_list)
+                context_list = [f"- {c.get('window_title', 'Unknown')}" for c in recent_contexts[:3]]
+                context_summary = "Recent windows: " + ", ".join([c.get('window_title', 'Unknown') for c in recent_contexts[:3]])
             
-            user_context = self.load_user_profile()
-            
-            # Use Gemma to analyze for learning (Gemini prompt port)
-            prompt = f"""You are Rin, building your understanding of the user.{user_context}
-            
-Current window: {window_title}
-Screen: {screen_desc}
-Audio: {audio_context}
+            analysis_prompt = f"""Based on this screen description, provide a learning analysis.
+
+Window title: {window_title}
+Screen content: {screen_description}
+{audio_hint}
 {context_summary}
 
-Analyze this screen (and audio if provided) and answer:
+Respond with JSON only:
+{{"is_new": true/false, "learning": "what you learned about the user or null", "category": "interest/workflow/habit/preference/null", "recommendation": "short advice or null", "confidence": 0.0-1.0}}"""
 
-1. IS_NEW: Is this meaningfully different from recent contexts? (true/false)
-2. LEARNING: What can I learn about the user from this? Consider both visual and audio cues. (one short insight, or null if nothing notable)
-   - IMPORTANT: Audio is NOT temporary. It reveals PERMANENT facts about user taste (e.g., "User loves synthwave music", "User plays FPS games").
-   - If you hear music, identify the genre/mood and store it as a 'preference'.
-   - If you hear game sounds, identify the game type and store it as an 'interest'.
-3. CATEGORY: If there's a learning, what category? (interest, workflow, habit, preference, general_knowledge, or null)
-   - 'general_knowledge': meaningful concepts from the WORLD (e.g., "The game 'Elden Ring' is an open-world RPG").
-4. RECOMMENDATION: SHORT, specific advice (under 100 chars) WITH PERSONALITY!
-   - If User is CODING: Suggest a refactor or best practice ONLY if you see a CLEAR improvement.
-   - DO NOT suggest things just to speak. If code looks good, offer a compliment or say nothing (null).
-   - ANTI-REPETITION: Do NOT repeat the same advice if you just gave it.
-   - STYLE: Be bubbly, enthusiastic, and supportive! Don't be robotic.
-   - Example: "Ooh, try a list comprehension here—it's faster! 🚀"
-   - Compliments and encouragement ARE valid recommendations!
-5. CONFIDENCE: How confident am I in these assessments? (0.0 to 1.0)
-
-Respond ONLY with valid JSON in this exact format:
-{{"is_new": true, "learning": "...", "category": "preference", "recommendation": "...", "confidence": 0.7}}"""
-
-            response = await self._call_chat(prompt)
+            # Use chat model for reasoning
+            analysis_response = await self._call_chat(analysis_prompt)
             
             # Parse JSON response
-            text = response.strip()
+            text = analysis_response.strip()
             if text.startswith("```"):
                 text = text.split("```")[1]
                 if text.startswith("json"):
