@@ -77,16 +77,26 @@ echo   - Upgrading pip...
 venv\Scripts\python.exe -m pip install --upgrade pip > nul 2>&1
 
 
-echo   - Installing PyTorch with CUDA support...
-venv\Scripts\python.exe -m pip uninstall -y torch torchvision 2>nul
-venv\Scripts\python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-
 echo   - Installing/Updating backend dependencies...
-venv\Scripts\python.exe -m pip install --upgrade -r requirements.txt
+venv\Scripts\python.exe -m pip install --upgrade --upgrade-strategy only-if-needed -r requirements.txt
 if errorlevel 1 (
     echo   ! FAIL: Backend dependency install failed.
     pause
     exit /b
+)
+
+echo   - Installing PyTorch with CUDA support...
+venv\Scripts\python.exe -m pip uninstall -y torch torchvision 2>nul
+venv\Scripts\python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+if errorlevel 1 (
+    echo   ! WARNING: CUDA 12.1 PyTorch install failed. Trying CPU-only version...
+    venv\Scripts\python.exe -m pip install torch torchvision
+    if errorlevel 1 (
+        echo   ! FAIL: PyTorch installation failed completely.
+        pause
+        exit /b
+    )
+    echo   ! NOTE: CPU-only PyTorch installed. Audio processing will be slower.
 )
 
 echo   - Configuring system integration (pywin32)...
