@@ -66,7 +66,7 @@ class WhisperProcessor:
         Transcribe audio bytes (WAV format) to text.
         
         Args:
-            audio_bytes: WAV file as bytes
+            audio_bytes: WAV file as bytes (supports 16-bit PCM or 32-bit float)
             
         Returns:
             Transcribed text or None if transcription failed
@@ -78,20 +78,73 @@ class WhisperProcessor:
             return None
         
         try:
-            # Convert WAV bytes to numpy array
-            wav_io = io.BytesIO(audio_bytes)
-            with wave.open(wav_io, 'rb') as wf:
-                sample_rate = wf.getframerate()
-                n_channels = wf.getnchannels()
-                n_frames = wf.getnframes()
-                audio_data = wf.readframes(n_frames)
+            # Parse WAV header manually to handle 32-bit float format
+            # Standard wave module doesn't handle IEEE float well
+            import struct
             
-            # Convert to float32 numpy array
-            audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
+            wav_io = io.BytesIO(audio_bytes)
+            
+            # Read RIFF header
+            riff = wav_io.read(4)
+            if riff != b'RIFF':
+                print("[Whisper] Not a valid WAV file")
+                return None
+            
+            wav_io.read(4)  # file size
+            wave_id = wav_io.read(4)
+            if wave_id != b'WAVE':
+                print("[Whisper] Not a valid WAV file")
+                return None
+            
+            # Find fmt chunk
+            sample_rate = 48000
+            n_channels = 2
+            bits_per_sample = 32
+            is_float = False
+            
+            while True:
+                chunk_id = wav_io.read(4)
+                if len(chunk_id) < 4:
+                    break
+                chunk_size = struct.unpack('<I', wav_io.read(4))[0]
+                
+                if chunk_id == b'fmt ':
+                    fmt_data = wav_io.read(chunk_size)
+                    audio_format = struct.unpack('<H', fmt_data[0:2])[0]
+                    n_channels = struct.unpack('<H', fmt_data[2:4])[0]
+                    sample_rate = struct.unpack('<I', fmt_data[4:8])[0]
+                    bits_per_sample = struct.unpack('<H', fmt_data[14:16])[0]
+                    # Format 3 = IEEE float, Format 1 = PCM
+                    is_float = (audio_format == 3)
+                elif chunk_id == b'data':
+                    audio_data = wav_io.read(chunk_size)
+                    break
+                else:
+                    wav_io.read(chunk_size)  # Skip unknown chunks
+            
+            # Convert to float32 numpy array based on format
+            if is_float and bits_per_sample == 32:
+                # 32-bit float (from C# WASAPI capture)
+                audio_np = np.frombuffer(audio_data, dtype=np.float32)
+            elif bits_per_sample == 16:
+                # 16-bit PCM
+                audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
+            elif bits_per_sample == 24:
+                # 24-bit PCM - convert manually
+                n_samples = len(audio_data) // 3
+                audio_np = np.zeros(n_samples, dtype=np.float32)
+                for i in range(n_samples):
+                    sample = int.from_bytes(audio_data[i*3:(i+1)*3], 'little', signed=True)
+                    audio_np[i] = sample / 8388608.0  # 2^23
+            else:
+                print(f"[Whisper] Unsupported bit depth: {bits_per_sample}")
+                return None
             
             # If stereo, convert to mono
             if n_channels == 2:
                 audio_np = audio_np.reshape(-1, 2).mean(axis=1)
+            elif n_channels > 2:
+                audio_np = audio_np.reshape(-1, n_channels).mean(axis=1)
             
             # Resample to 16kHz if needed (Whisper expects 16kHz)
             if sample_rate != 16000:
@@ -125,6 +178,8 @@ class WhisperProcessor:
             
         except Exception as e:
             print(f"[Whisper] Transcription failed: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def describe_audio(self, audio_bytes: bytes) -> Optional[str]:
@@ -140,10 +195,41 @@ class WhisperProcessor:
         # If no speech detected, check if there's audio at all
         if audio_bytes:
             try:
+                # Use same WAV parsing as transcribe
+                import struct
                 wav_io = io.BytesIO(audio_bytes)
-                with wave.open(wav_io, 'rb') as wf:
-                    audio_data = wf.readframes(wf.getnframes())
-                audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
+                
+                # Skip RIFF header
+                wav_io.read(12)
+                
+                # Parse chunks to find format and data
+                is_float = False
+                bits_per_sample = 16
+                audio_data = b''
+                
+                while True:
+                    chunk_id = wav_io.read(4)
+                    if len(chunk_id) < 4:
+                        break
+                    chunk_size = struct.unpack('<I', wav_io.read(4))[0]
+                    
+                    if chunk_id == b'fmt ':
+                        fmt_data = wav_io.read(chunk_size)
+                        audio_format = struct.unpack('<H', fmt_data[0:2])[0]
+                        bits_per_sample = struct.unpack('<H', fmt_data[14:16])[0]
+                        is_float = (audio_format == 3)
+                    elif chunk_id == b'data':
+                        audio_data = wav_io.read(chunk_size)
+                        break
+                    else:
+                        wav_io.read(chunk_size)
+                
+                # Convert based on format
+                if is_float and bits_per_sample == 32:
+                    audio_np = np.frombuffer(audio_data, dtype=np.float32)
+                else:
+                    audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
+                
                 rms = np.sqrt(np.mean(audio_np**2))
                 
                 if rms > 0.05:

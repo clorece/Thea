@@ -3,7 +3,7 @@ echo ==========================================
 echo      RIN - SYSTEM SETUP
 echo ==========================================
 
-echo [1/4] Detecting Python...
+echo [1/5] Detecting Python...
 set CARBON_PYTHON=python
 
 :: Check if python exists
@@ -42,7 +42,7 @@ if errorlevel 1 (
 )
 echo   - Python 3.10+ detected.
 
-echo [2/4] Checking Ollama...
+echo [2/5] Checking Ollama...
 ollama --version > nul 2>&1
 if errorlevel 1 (
     echo   ! WARNING: Ollama not found!
@@ -57,11 +57,11 @@ echo   - Ollama detected.
 echo   - Pulling required models...
 echo   - Downloading gemma3:4b (chat model)...
 ollama pull gemma3:4b
-echo   - Downloading moondream:latest (vision model)...
-ollama pull moondream:latest
+echo   - Downloading llama3.2-vision:latest (vision model)...
+ollama pull llama3.2-vision:latest
 echo   - Models ready.
 
-echo [3/4] Setting up Backend...
+echo [3/5] Setting up Backend...
 cd backend
 if not exist venv (
     echo   - Creating virtual environment...
@@ -95,7 +95,31 @@ if exist venv\Scripts\pywin32_postinstall.py (
 )
 cd ..
 
-echo [4/4] Setting up Frontend...
+echo [4/5] Building Audio Capture Tool...
+:: Check if dotnet is available
+dotnet --version > nul 2>&1
+if errorlevel 1 (
+    echo   ! .NET SDK not found. Installing audio capture pre-built binary...
+    :: The tool is already built as self-contained, so this is OK
+    if exist tools\AudioCapture\publish\AudioCapture.exe (
+        echo   - Pre-built AudioCapture.exe found.
+    ) else (
+        echo   ! WARNING: AudioCapture.exe not found and .NET not available.
+        echo   ! Audio capture may not work. Install .NET 8 SDK to build from source.
+    )
+) else (
+    echo   - .NET detected. Building AudioCapture tool...
+    cd tools\AudioCapture
+    dotnet publish -c Release -o publish --self-contained true > nul 2>&1
+    if errorlevel 1 (
+        echo   ! WARNING: AudioCapture build failed. Using pre-built if available.
+    ) else (
+        echo   - AudioCapture tool built successfully.
+    )
+    cd ..\..
+)
+
+echo [5/5] Setting up Frontend...
 echo   - Checking npm...
 call npm --version > nul 2>&1
 if errorlevel 1 (
@@ -127,6 +151,7 @@ echo ==========================================
 echo.
 echo [OK] All dependencies installed.
 echo [OK] Ollama models downloaded.
+echo [OK] Audio capture tool ready.
 echo.
 echo You can now run 'start.bat'
 pause

@@ -10,7 +10,14 @@ frontend/build/
 frontend/.DS_Store
 
 # Logs & Temp
-#logs/
+logs/
+*.log
+*_log.txt
+
+# Test Files
+test_*.wav
+test_*.py
+audio_verification.wav
 
 # User Data & Memory (Privacy)
 data/
@@ -23,6 +30,12 @@ db/
 !tsconfig.json
 !knowledge/core_kb.json
 !knowledge/gemini_kb.json
+
+# C# Audio Tool Build Artifacts
+tools/AudioCapture/bin/
+tools/AudioCapture/obj/
+tools/AudioCapture/publish/*.pdb
+tools/AudioCapture/*.wav
 
 # Editor
 .vscode/
